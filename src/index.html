@@ -1966,16 +1966,6 @@
               });
             }
           }
-          
-          // Listen for title changes (for notification badges)
-          webview.addEventListener('page-title-updated', (e) => {
-            const match = e.title.match(/^\((\d+)\)/);
-            if (match) {
-              updateBadge(tab.id, parseInt(match[1]));
-            } else {
-              updateBadge(tab.id, 0);
-            }
-          });
         });
         
         groupDiv.appendChild(tabsDiv);
