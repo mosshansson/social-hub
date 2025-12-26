@@ -28,7 +28,11 @@
       --accent-instagram: #e1306c;
       --accent-instagram-stats: #833ab4;
       --accent-tiktok: #00f2ea;
+      --accent-gmail: #ea4335;
+      --accent-outlook: #0078d4;
+      --accent-custom: #10b981;
       --accent-glow: rgba(0, 132, 255, 0.15);
+      --badge-bg: #ef4444;
     }
 
     body {
@@ -70,6 +74,12 @@
       opacity: 0.7;
     }
 
+    .titlebar-shortcuts {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
     .window-controls {
       display: flex;
       gap: 8px;
@@ -85,10 +95,7 @@
       transition: opacity 0.15s;
     }
 
-    .window-btn:hover {
-      opacity: 0.8;
-    }
-
+    .window-btn:hover { opacity: 0.8; }
     .btn-close { background: #ff5f57; }
     .btn-minimize { background: #febc2e; }
     .btn-maximize { background: #28c840; }
@@ -108,7 +115,46 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px 0;
+      padding: 12px 0;
+      gap: 4px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 0;
+    }
+
+    /* Tab Groups */
+    .tab-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab-group-header {
+      width: 48px;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 0 4px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .tab-group-header:hover {
+      color: var(--text-secondary);
+    }
+
+    .tab-group-tabs {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 4px;
     }
 
@@ -137,17 +183,9 @@
       transition: height 0.2s ease;
     }
 
-    .tab-button:hover {
-      background: var(--bg-hover);
-    }
-
-    .tab-button.active {
-      background: var(--bg-tertiary);
-    }
-
-    .tab-button.active::before {
-      height: 20px;
-    }
+    .tab-button:hover { background: var(--bg-hover); }
+    .tab-button.active { background: var(--bg-tertiary); }
+    .tab-button.active::before { height: 20px; }
 
     .tab-button svg {
       width: 22px;
@@ -157,19 +195,52 @@
     }
 
     .tab-button:hover svg,
-    .tab-button.active svg {
-      color: var(--text-primary);
-    }
+    .tab-button.active svg { color: var(--text-primary); }
 
     .tab-button.messenger svg { color: var(--accent-messenger); }
     .tab-button.instagram-chat svg { color: var(--accent-instagram); }
     .tab-button.instagram-stats svg { color: var(--accent-instagram-stats); }
     .tab-button.tiktok svg { color: var(--accent-tiktok); }
+    .tab-button.gmail svg { color: var(--accent-gmail); }
+    .tab-button.outlook svg { color: var(--accent-outlook); }
+    .tab-button.custom svg { color: var(--accent-custom); }
+
+    /* Notification Badge */
+    .tab-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: var(--badge-bg);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 9px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-primary);
+    }
+
+    .tab-badge.visible { display: flex; }
+
+    /* Tab number indicator */
+    .tab-number {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
 
     .tab-button .close-tab {
       position: absolute;
       top: -4px;
-      right: -4px;
+      left: -4px;
       width: 16px;
       height: 16px;
       border-radius: 50%;
@@ -184,10 +255,7 @@
       line-height: 1;
     }
 
-    .tab-button:hover .close-tab {
-      display: flex;
-    }
-
+    .tab-button:hover .close-tab { display: flex; }
     .close-tab:hover {
       background: #ff5f57;
       color: white;
@@ -213,6 +281,7 @@
       justify-content: center;
       transition: all 0.2s ease;
       margin-top: auto;
+      flex-shrink: 0;
     }
 
     .add-tab-btn:hover {
@@ -227,9 +296,7 @@
       transition: color 0.2s;
     }
 
-    .add-tab-btn:hover svg {
-      color: var(--text-secondary);
-    }
+    .add-tab-btn:hover svg { color: var(--text-secondary); }
 
     /* Content Area */
     .content-area {
@@ -327,7 +394,30 @@
       line-height: 1.6;
     }
 
-    /* Add Tab Modal */
+    .shortcuts-hint {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .shortcut {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .shortcut kbd {
+      background: var(--bg-tertiary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      border: 1px solid var(--border);
+    }
+
+    /* Modal Styles */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -339,16 +429,16 @@
       z-index: 1000;
     }
 
-    .modal-overlay.active {
-      display: flex;
-    }
+    .modal-overlay.active { display: flex; }
 
     .modal {
       background: var(--bg-secondary);
       border-radius: 16px;
       border: 1px solid var(--border);
       padding: 24px;
-      width: 360px;
+      width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
 
@@ -383,18 +473,37 @@
       color: var(--text-primary);
     }
 
+    /* Service Categories */
+    .service-category {
+      margin-bottom: 16px;
+    }
+
+    .service-category:last-child {
+      margin-bottom: 0;
+    }
+
+    .category-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
     .service-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .service-option {
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 14px 16px;
-      border-radius: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--bg-tertiary);
       cursor: pointer;
@@ -408,8 +517,8 @@
     }
 
     .service-option svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       flex-shrink: 0;
     }
 
@@ -417,44 +526,124 @@
     .service-option.instagram-chat svg { color: var(--accent-instagram); }
     .service-option.instagram-stats svg { color: var(--accent-instagram-stats); }
     .service-option.tiktok svg { color: var(--accent-tiktok); }
+    .service-option.gmail svg { color: var(--accent-gmail); }
+    .service-option.outlook svg { color: var(--accent-outlook); }
+    .service-option.custom svg { color: var(--accent-custom); }
 
-    .service-info {
-      flex: 1;
-    }
+    .service-info { flex: 1; }
 
     .service-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--text-primary);
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
 
     .service-desc {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
     }
 
-    /* Loading state for webview */
-    .webview-loading {
-      position: absolute;
-      inset: 0;
+    /* Custom Service Form */
+    .custom-form {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .custom-form.active { display: flex; }
+
+    .form-group {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-deep);
+      flex-direction: column;
+      gap: 6px;
     }
 
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid var(--border);
-      border-top-color: var(--text-primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .form-input {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-custom);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .form-select {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent-custom);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+
+    .btn-secondary {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+    }
+
+    /* Rename Modal */
+    .rename-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     /* Webview toolbar */
@@ -514,16 +703,275 @@
       font-size: 12px;
       font-weight: 500;
       color: var(--text-secondary);
-      margin-left: auto;
       padding: 4px 10px;
       border-radius: 6px;
       background: var(--bg-tertiary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tab-label:hover {
+      background: var(--bg-hover);
     }
 
     .tab-label.messenger { color: var(--accent-messenger); }
     .tab-label.instagram-chat { color: var(--accent-instagram); }
     .tab-label.instagram-stats { color: var(--accent-instagram-stats); }
     .tab-label.tiktok { color: var(--accent-tiktok); }
+    .tab-label.gmail { color: var(--accent-gmail); }
+    .tab-label.outlook { color: var(--accent-outlook); }
+    .tab-label.custom { color: var(--accent-custom); }
+
+    /* Context Menu */
+    .context-menu {
+      position: fixed;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      min-width: 160px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      display: none;
+    }
+
+    .context-menu.active { display: block; }
+
+    .context-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+
+    .context-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .context-item svg {
+      width: 14px;
+      height: 14px;
+      color: var(--text-secondary);
+    }
+
+    .context-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    .context-item.danger { color: #ef4444; }
+    .context-item.danger svg { color: #ef4444; }
+
+    /* Email UI Styles */
+    .email-container {
+      display: flex;
+      height: 100%;
+      background: var(--bg-deep);
+    }
+
+    .email-sidebar {
+      width: 200px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+    }
+
+    .email-account-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .email-folders {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .email-folder {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .email-folder:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .email-folder.active {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .email-folder svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .compose-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent-custom);
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .compose-btn:hover {
+      opacity: 0.9;
+    }
+
+    .compose-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .email-list {
+      width: 350px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-subtle);
+      overflow-y: auto;
+    }
+
+    .email-loading {
+      padding: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .email-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .email-item:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .email-item.active {
+      background: var(--bg-tertiary);
+      border-left: 3px solid var(--accent-custom);
+    }
+
+    .email-item.unread {
+      background: var(--bg-tertiary);
+    }
+
+    .email-item.unread .email-item-from {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .email-item-from {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-item-subject {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-item-preview {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-item-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      float: right;
+    }
+
+    .email-viewer {
+      flex: 1;
+      background: var(--bg-deep);
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .email-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .email-header {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .email-subject {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .email-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .email-body {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .email-body a {
+      color: var(--accent-custom);
+    }
   </style>
 </head>
 <body>
@@ -537,6 +985,7 @@
       </svg>
       SOCIAL HUB
     </div>
+    <div class="titlebar-shortcuts">Ctrl+1-9 switch tabs • Ctrl+N new tab</div>
     <div class="window-controls">
       <button class="window-btn btn-minimize" onclick="electronAPI.minimize()"></button>
       <button class="window-btn btn-maximize" onclick="electronAPI.maximize()"></button>
@@ -547,7 +996,7 @@
   <div class="app-container">
     <!-- Sidebar -->
     <div class="sidebar">
-      <div id="tab-buttons"></div>
+      <div id="tab-groups"></div>
       <div class="sidebar-divider"></div>
       <button class="add-tab-btn" onclick="openAddModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -560,7 +1009,6 @@
     <!-- Content Area -->
     <div class="content-area">
       <div id="tab-contents">
-        <!-- Welcome screen shown when no tabs -->
         <div class="welcome-screen" id="welcome-screen">
           <div class="welcome-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -571,6 +1019,11 @@
           <p class="welcome-subtitle">
             Add your first service tab to get started. Each tab maintains its own login session, so you can use multiple accounts simultaneously.
           </p>
+          <div class="shortcuts-hint">
+            <div class="shortcut"><kbd>Ctrl</kbd>+<kbd>N</kbd> New tab</div>
+            <div class="shortcut"><kbd>Ctrl</kbd>+<kbd>1-9</kbd> Switch tabs</div>
+            <div class="shortcut"><kbd>Ctrl</kbd>+<kbd>W</kbd> Close tab</div>
+          </div>
         </div>
       </div>
     </div>
@@ -588,47 +1041,320 @@
           </svg>
         </button>
       </div>
-      <div class="service-list">
-        <div class="service-option messenger" onclick="addTab('messenger')">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.936 1.444 5.544 3.7 7.256v3.501l3.363-1.847c.898.248 1.85.382 2.837.382 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.426l-2.547-2.72-4.97 2.72 5.467-5.803 2.612 2.72 4.905-2.72-5.467 5.803z"/>
-          </svg>
-          <div class="service-info">
-            <div class="service-name">Messenger</div>
-            <div class="service-desc">Facebook chat & comments</div>
+
+      <!-- Social Services -->
+      <div class="service-category">
+        <div class="category-title">Social</div>
+        <div class="service-list">
+          <div class="service-option messenger" onclick="addTab('messenger')">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.936 1.444 5.544 3.7 7.256v3.501l3.363-1.847c.898.248 1.85.382 2.837.382 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.426l-2.547-2.72-4.97 2.72 5.467-5.803 2.612 2.72 4.905-2.72-5.467 5.803z"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">Messenger</div>
+              <div class="service-desc">Facebook chat & comments</div>
+            </div>
+          </div>
+          <div class="service-option instagram-chat" onclick="addTab('instagram-chat')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="20" rx="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="18" cy="6" r="1.5" fill="currentColor"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">Instagram Chat</div>
+              <div class="service-desc">DMs & comment replies</div>
+            </div>
+          </div>
+          <div class="service-option instagram-stats" onclick="addTab('instagram-stats')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">Instagram Analytics</div>
+              <div class="service-desc">Post stats & insights</div>
+            </div>
+          </div>
+          <div class="service-option tiktok" onclick="addTab('tiktok')">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">TikTok Analytics</div>
+              <div class="service-desc">Video stats & performance</div>
+            </div>
           </div>
         </div>
-        <div class="service-option instagram-chat" onclick="addTab('instagram-chat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="2" width="20" height="20" rx="5"/>
-            <circle cx="12" cy="12" r="4"/>
-            <circle cx="18" cy="6" r="1.5" fill="currentColor"/>
-          </svg>
-          <div class="service-info">
-            <div class="service-name">Instagram Chat</div>
-            <div class="service-desc">DMs & comment replies</div>
+      </div>
+
+      <!-- Email Services -->
+      <div class="service-category">
+        <div class="category-title">Email</div>
+        <div class="service-list">
+          <div class="service-option" style="cursor: pointer;" onclick="addTab('email-imap')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-custom);">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">Email (IMAP)</div>
+              <div class="service-desc">Gmail, Outlook, Yahoo & more</div>
+            </div>
+          </div>
+          <div class="service-option gmail" style="opacity: 0.5; cursor: not-allowed;" onclick="showComingSoon('Gmail direct login')">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">Gmail <span style="font-size: 10px; background: var(--bg-hover); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Coming Soon</span></div>
+              <div class="service-desc">Direct webview login</div>
+            </div>
+          </div>
+          <div class="service-option outlook" onclick="addTab('outlook')">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 7.387v10.478c0 .23-.08.424-.238.576-.158.154-.352.23-.58.23h-8.547v-6.959l1.6 1.18c.106.077.236.116.388.116.152 0 .283-.04.39-.116l6.87-5.1c.095-.063.166-.063.214 0 .047.063.047.148 0 .254l-.097.341zm-.818-1.06c0-.167-.044-.247-.133-.24-.09.006-.2.073-.332.2l-7.127 5.298-1.954-1.442V7.387c0-.23-.08-.424-.238-.576-.158-.153-.352-.23-.58-.23H7.636v14.838h14.546c.228 0 .422-.077.58-.23.158-.152.238-.346.238-.577V6.328zM7.091 3.844c0-.307-.1-.557-.299-.75-.2-.193-.463-.29-.79-.29H.79c-.327 0-.59.097-.79.29-.2.193-.3.443-.3.75v14.52c0 .306.1.556.3.75.2.192.463.289.79.289h5.21V3.844zm.545 8.66c0-1.14-.298-2.06-.894-2.759-.597-.699-1.391-1.049-2.381-1.049-.99 0-1.784.35-2.38 1.049-.598.7-.897 1.62-.897 2.76s.299 2.06.896 2.759c.597.699 1.39 1.048 2.381 1.048s1.784-.35 2.38-1.048c.597-.7.895-1.62.895-2.76zm-2.198 0c0 .615-.105 1.084-.316 1.408-.21.324-.513.486-.907.486-.394 0-.697-.162-.908-.486-.21-.324-.316-.793-.316-1.408s.105-1.085.316-1.408c.21-.324.514-.486.908-.486.394 0 .696.162.907.486.21.323.316.793.316 1.408z"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">Outlook Web</div>
+              <div class="service-desc">Microsoft webmail</div>
+            </div>
           </div>
         </div>
-        <div class="service-option instagram-stats" onclick="addTab('instagram-stats')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 20V10"/>
-            <path d="M12 20V4"/>
-            <path d="M6 20v-6"/>
-          </svg>
-          <div class="service-info">
-            <div class="service-name">Instagram Analytics</div>
-            <div class="service-desc">Post stats & insights</div>
+      </div>
+
+      <!-- Custom Service -->
+      <div class="service-category">
+        <div class="category-title">Other</div>
+        <div class="service-list">
+          <div class="service-option custom" onclick="showCustomForm()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            <div class="service-info">
+              <div class="service-name">Custom Service</div>
+              <div class="service-desc">Add any website</div>
+            </div>
           </div>
         </div>
-        <div class="service-option tiktok" onclick="addTab('tiktok')">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-          </svg>
-          <div class="service-info">
-            <div class="service-name">TikTok Analytics</div>
-            <div class="service-desc">Video stats & performance</div>
+      </div>
+
+      <!-- Custom Form -->
+      <div class="custom-form" id="custom-form">
+        <div class="form-group">
+          <label class="form-label">Service Name</label>
+          <input type="text" class="form-input" id="custom-name" placeholder="e.g., Work Email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL</label>
+          <input type="url" class="form-input" id="custom-url" placeholder="https://mail.example.com">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Group</label>
+            <select class="form-select" id="custom-group">
+              <option value="default">Default</option>
+              <option value="work">Work</option>
+              <option value="personal">Personal</option>
+            </select>
           </div>
         </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn-secondary" onclick="hideCustomForm()" style="flex: 1;">Cancel</button>
+          <button class="btn-primary" onclick="addCustomTab()" style="flex: 1;">Add Service</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Modal -->
+  <div class="modal-overlay" id="rename-modal">
+    <div class="modal" style="width: 320px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Rename Tab</h2>
+        <button class="modal-close" onclick="closeRenameModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="rename-form">
+        <div class="form-group">
+          <label class="form-label">Tab Name</label>
+          <input type="text" class="form-input" id="rename-input" placeholder="Enter new name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Group</label>
+          <select class="form-select" id="rename-group">
+            <option value="default">Default</option>
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="saveRename()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="context-menu">
+    <div class="context-item" onclick="renameCurrentTab()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+      Rename
+    </div>
+    <div class="context-item" onclick="changeGroup()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      Change Group
+    </div>
+    <div class="context-item" onclick="reloadCurrentTab()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+      Reload
+    </div>
+    <div class="context-divider"></div>
+    <div class="context-item danger" onclick="closeCurrentTab()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Close Tab
+    </div>
+  </div>
+
+  <!-- Auth Modal for Gmail etc -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal" style="width: 400px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Login to <span id="auth-service-name">Gmail</span></h2>
+        <button class="modal-close" onclick="closeAuthModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+          Google blocks sign-in from embedded apps. To use Gmail in Social Hub:
+        </p>
+        <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--accent-gmail); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">1</div>
+            <span style="font-size: 13px;">Click below to login in your browser</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--accent-gmail); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">2</div>
+            <span style="font-size: 13px;">Complete the Google sign-in</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--accent-gmail); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">3</div>
+            <span style="font-size: 13px;">Come back and click "Import Session"</span>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="openBrowserLogin()" style="background: var(--accent-gmail);">
+          Open Browser Login
+        </button>
+        <button class="btn-secondary" onclick="importSessionAndCreate()">
+          Import Session & Add Tab
+        </button>
+        <p style="font-size: 11px; color: var(--text-muted); text-align: center;">
+          Works with Chrome, Firefox, and Chromium-based browsers
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Setup Modal -->
+  <div class="modal-overlay" id="email-setup-modal">
+    <div class="modal" style="width: 440px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Setup Email Account</h2>
+        <button class="modal-close" onclick="closeEmailSetupModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">Email Provider</label>
+          <select class="form-select" id="email-provider" onchange="onProviderChange()">
+            <option value="gmail">Gmail</option>
+            <option value="outlook">Outlook / Hotmail</option>
+            <option value="yahoo">Yahoo Mail</option>
+            <option value="icloud">iCloud Mail</option>
+            <option value="custom">Custom IMAP/SMTP</option>
+          </select>
+        </div>
+        <p id="provider-note" style="font-size: 11px; color: var(--text-muted); background: var(--bg-tertiary); padding: 10px; border-radius: 6px;">
+          Requires App Password (enable 2FA first)
+        </p>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="email-address" placeholder="you@gmail.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password / App Password</label>
+          <input type="password" class="form-input" id="email-password" placeholder="App-specific password">
+        </div>
+        
+        <!-- Custom server fields (hidden by default) -->
+        <div id="custom-server-fields" style="display: none; flex-direction: column; gap: 16px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">IMAP Server</label>
+              <input type="text" class="form-input" id="imap-host" placeholder="imap.example.com">
+            </div>
+            <div class="form-group" style="width: 100px;">
+              <label class="form-label">Port</label>
+              <input type="number" class="form-input" id="imap-port" value="993">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">SMTP Server</label>
+              <input type="text" class="form-input" id="smtp-host" placeholder="smtp.example.com">
+            </div>
+            <div class="form-group" style="width: 100px;">
+              <label class="form-label">Port</label>
+              <input type="number" class="form-input" id="smtp-port" value="587">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Tab Name</label>
+          <input type="text" class="form-input" id="email-tab-name" placeholder="Personal Gmail">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Group</label>
+          <select class="form-select" id="email-group">
+            <option value="default">Default</option>
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+          </select>
+        </div>
+        
+        <div id="email-setup-error" style="display: none; color: #ef4444; font-size: 12px; padding: 10px; background: rgba(239,68,68,0.1); border-radius: 6px;"></div>
+        
+        <div style="display: flex; gap: 12px;">
+          <button class="btn-secondary" onclick="testEmailConnection()" style="flex: 1;">Test Connection</button>
+          <button class="btn-primary" onclick="addEmailAccount()" style="flex: 1; background: var(--accent-custom);">Add Account</button>
+        </div>
+        
+        <p style="font-size: 11px; color: var(--text-muted); text-align: center;">
+          <a href="#" onclick="electronAPI.openExternal('https://myaccount.google.com/apppasswords'); return false;" style="color: var(--accent-gmail);">How to get Gmail App Password</a>
+        </p>
       </div>
     </div>
   </div>
@@ -639,28 +1365,66 @@
       'messenger': {
         name: 'Messenger',
         url: 'https://www.messenger.com',
-        icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.936 1.444 5.544 3.7 7.256v3.501l3.363-1.847c.898.248 1.85.382 2.837.382 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.426l-2.547-2.72-4.97 2.72 5.467-5.803 2.612 2.72 4.905-2.72-5.467 5.803z"/></svg>`
+        icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.936 1.444 5.544 3.7 7.256v3.501l3.363-1.847c.898.248 1.85.382 2.837.382 5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.093 12.426l-2.547-2.72-4.97 2.72 5.467-5.803 2.612 2.72 4.905-2.72-5.467 5.803z"/></svg>`,
+        defaultGroup: 'default'
       },
       'instagram-chat': {
         name: 'Instagram',
         url: 'https://www.instagram.com/direct/inbox/',
-        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1.5" fill="currentColor"/></svg>`
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1.5" fill="currentColor"/></svg>`,
+        defaultGroup: 'default'
       },
       'instagram-stats': {
         name: 'IG Analytics',
         url: 'https://www.instagram.com/accounts/insights/',
-        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>`
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>`,
+        defaultGroup: 'default'
       },
       'tiktok': {
         name: 'TikTok',
         url: 'https://www.tiktok.com/analytics',
-        icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>`
+        icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>`,
+        defaultGroup: 'default'
+      },
+      'gmail': {
+        name: 'Gmail',
+        url: 'https://mail.google.com',
+        icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>`,
+        defaultGroup: 'default',
+        comingSoon: true
+      },
+      'email-imap': {
+        name: 'Email',
+        url: '',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+        defaultGroup: 'default',
+        isEmail: true
+      },
+      'outlook': {
+        name: 'Outlook',
+        url: 'https://outlook.live.com/mail/',
+        icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 7.387v10.478c0 .23-.08.424-.238.576-.158.154-.352.23-.58.23h-8.547v-6.959l1.6 1.18c.106.077.236.116.388.116.152 0 .283-.04.39-.116l6.87-5.1c.095-.063.166-.063.214 0 .047.063.047.148 0 .254l-.097.341zm-.818-1.06c0-.167-.044-.247-.133-.24-.09.006-.2.073-.332.2l-7.127 5.298-1.954-1.442V7.387c0-.23-.08-.424-.238-.576-.158-.153-.352-.23-.58-.23H7.636v14.838h14.546c.228 0 .422-.077.58-.23.158-.152.238-.346.238-.577V6.328zM7.091 3.844c0-.307-.1-.557-.299-.75-.2-.193-.463-.29-.79-.29H.79c-.327 0-.59.097-.79.29-.2.193-.3.443-.3.75v14.52c0 .306.1.556.3.75.2.192.463.289.79.289h5.21V3.844zm.545 8.66c0-1.14-.298-2.06-.894-2.759-.597-.699-1.391-1.049-2.381-1.049-.99 0-1.784.35-2.38 1.049-.598.7-.897 1.62-.897 2.76s.299 2.06.896 2.759c.597.699 1.39 1.048 2.381 1.048s1.784-.35 2.38-1.048c.597-.7.895-1.62.895-2.76zm-2.198 0c0 .615-.105 1.084-.316 1.408-.21.324-.513.486-.907.486-.394 0-.697-.162-.908-.486-.21-.324-.316-.793-.316-1.408s.105-1.085.316-1.408c.21-.324.514-.486.908-.486.394 0 .696.162.907.486.21.323.316.793.316 1.408z"/></svg>`,
+        defaultGroup: 'default'
+      },
+      'custom': {
+        name: 'Custom',
+        url: '',
+        icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
+        defaultGroup: 'default'
       }
+    };
+
+    const groupNames = {
+      'default': 'General',
+      'work': 'Work',
+      'personal': 'Personal'
     };
 
     // State
     let tabs = [];
     let activeTabId = null;
+    let contextTabId = null;
+    let renameTabId = null;
 
     // Initialize
     async function init() {
@@ -678,14 +1442,44 @@
 
     // Add new tab
     async function addTab(serviceType) {
-      const id = generateId();
       const service = services[serviceType];
+      
+      // If coming soon, show message
+      if (service.comingSoon) {
+        showComingSoon(service.name);
+        return;
+      }
+      
+      // If service is marked as external, open in default browser
+      if (service.external) {
+        electronAPI.openExternal(service.url);
+        closeAddModal();
+        return;
+      }
+      
+      // If service is email (IMAP), show email setup modal
+      if (service.isEmail) {
+        showEmailSetupModal();
+        return;
+      }
+      
+      // If service requires special auth (like Gmail), show auth modal
+      if (service.requiresAuth) {
+        showAuthModal(serviceType);
+        return;
+      }
+      
+      const id = generateId();
       const partition = await electronAPI.createTabSession(id);
       
       const tab = {
         id,
         type: serviceType,
-        partition
+        name: service.name,
+        url: service.url,
+        group: service.defaultGroup,
+        partition,
+        badge: 0
       };
       
       tabs.push(tab);
@@ -694,10 +1488,284 @@
       setActiveTab(id);
       closeAddModal();
     }
+    
+    // Coming soon message
+    function showComingSoon(name) {
+      alert(`${name} is coming soon! For now, use the "Email (IMAP)" option which works with Gmail using an App Password.`);
+    }
+    
+    // Auth modal for services like Gmail
+    let pendingAuthService = null;
+    
+    function showAuthModal(serviceType) {
+      pendingAuthService = serviceType;
+      const service = services[serviceType];
+      document.getElementById('auth-service-name').textContent = service.name;
+      document.getElementById('auth-modal').classList.add('active');
+      closeAddModal();
+    }
+    
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.remove('active');
+      pendingAuthService = null;
+    }
+    
+    function openBrowserLogin() {
+      if (pendingAuthService) {
+        const service = services[pendingAuthService];
+        electronAPI.openExternal(service.authUrl);
+      }
+    }
+    
+    async function importSessionAndCreate() {
+      if (!pendingAuthService) return;
+      
+      const service = services[pendingAuthService];
+      const id = generateId();
+      const partition = await electronAPI.createTabSession(id);
+      
+      // Request cookie import from main process
+      const success = await electronAPI.importBrowserCookies(partition, 'google.com');
+      
+      if (!success) {
+        alert('Could not import cookies. Make sure you are logged into Gmail in Chrome or Firefox, then try again.');
+        return;
+      }
+      
+      const tab = {
+        id,
+        type: pendingAuthService,
+        name: service.name,
+        url: service.url,
+        group: service.defaultGroup,
+        partition,
+        badge: 0
+      };
+      
+      tabs.push(tab);
+      saveTabs();
+      renderTabs();
+      setActiveTab(id);
+      closeAuthModal();
+    }
+
+    // Email setup modal functions
+    const emailPresets = {
+      'gmail': {
+        imap: { host: 'imap.gmail.com', port: 993 },
+        smtp: { host: 'smtp.gmail.com', port: 587 },
+        note: 'Requires App Password (enable 2FA first)'
+      },
+      'outlook': {
+        imap: { host: 'outlook.office365.com', port: 993 },
+        smtp: { host: 'smtp.office365.com', port: 587 },
+        note: 'Use your regular password or App Password'
+      },
+      'yahoo': {
+        imap: { host: 'imap.mail.yahoo.com', port: 993 },
+        smtp: { host: 'smtp.mail.yahoo.com', port: 587 },
+        note: 'Requires App Password'
+      },
+      'icloud': {
+        imap: { host: 'imap.mail.me.com', port: 993 },
+        smtp: { host: 'smtp.mail.me.com', port: 587 },
+        note: 'Requires App-Specific Password'
+      },
+      'custom': {
+        imap: { host: '', port: 993 },
+        smtp: { host: '', port: 587 },
+        note: 'Enter your server details manually'
+      }
+    };
+
+    function showEmailSetupModal() {
+      document.getElementById('email-setup-modal').classList.add('active');
+      closeAddModal();
+      onProviderChange(); // Initialize with Gmail preset
+    }
+
+    function closeEmailSetupModal() {
+      document.getElementById('email-setup-modal').classList.remove('active');
+      document.getElementById('email-setup-error').style.display = 'none';
+      // Clear form
+      document.getElementById('email-address').value = '';
+      document.getElementById('email-password').value = '';
+      document.getElementById('email-tab-name').value = '';
+    }
+
+    function onProviderChange() {
+      const provider = document.getElementById('email-provider').value;
+      const preset = emailPresets[provider];
+      const customFields = document.getElementById('custom-server-fields');
+      
+      document.getElementById('provider-note').textContent = preset.note;
+      
+      if (provider === 'custom') {
+        customFields.style.display = 'flex';
+      } else {
+        customFields.style.display = 'none';
+        document.getElementById('imap-host').value = preset.imap.host;
+        document.getElementById('imap-port').value = preset.imap.port;
+        document.getElementById('smtp-host').value = preset.smtp.host;
+        document.getElementById('smtp-port').value = preset.smtp.port;
+      }
+    }
+
+    function getEmailConfig() {
+      const provider = document.getElementById('email-provider').value;
+      const preset = emailPresets[provider];
+      
+      return {
+        email: document.getElementById('email-address').value.trim(),
+        password: document.getElementById('email-password').value,
+        imap: {
+          host: provider === 'custom' ? document.getElementById('imap-host').value : preset.imap.host,
+          port: parseInt(provider === 'custom' ? document.getElementById('imap-port').value : preset.imap.port),
+          tls: true
+        },
+        smtp: {
+          host: provider === 'custom' ? document.getElementById('smtp-host').value : preset.smtp.host,
+          port: parseInt(provider === 'custom' ? document.getElementById('smtp-port').value : preset.smtp.port),
+          secure: false
+        }
+      };
+    }
+
+    async function testEmailConnection() {
+      const config = getEmailConfig();
+      const errorDiv = document.getElementById('email-setup-error');
+      
+      if (!config.email || !config.password) {
+        errorDiv.textContent = 'Please enter email and password';
+        errorDiv.style.display = 'block';
+        return;
+      }
+      
+      errorDiv.textContent = 'Testing connection...';
+      errorDiv.style.display = 'block';
+      errorDiv.style.color = 'var(--text-secondary)';
+      errorDiv.style.background = 'var(--bg-tertiary)';
+      
+      try {
+        const result = await electronAPI.testEmailConnection(config);
+        if (result.success) {
+          errorDiv.textContent = '✓ Connection successful!';
+          errorDiv.style.color = '#10b981';
+          errorDiv.style.background = 'rgba(16,185,129,0.1)';
+        } else {
+          errorDiv.textContent = `Connection failed: ${result.error}`;
+          errorDiv.style.color = '#ef4444';
+          errorDiv.style.background = 'rgba(239,68,68,0.1)';
+        }
+      } catch (e) {
+        errorDiv.textContent = `Error: ${e.message}`;
+        errorDiv.style.color = '#ef4444';
+        errorDiv.style.background = 'rgba(239,68,68,0.1)';
+      }
+    }
+
+    async function addEmailAccount() {
+      const config = getEmailConfig();
+      const tabName = document.getElementById('email-tab-name').value.trim() || config.email.split('@')[0];
+      const group = document.getElementById('email-group').value;
+      const errorDiv = document.getElementById('email-setup-error');
+      
+      if (!config.email || !config.password) {
+        errorDiv.textContent = 'Please enter email and password';
+        errorDiv.style.display = 'block';
+        errorDiv.style.color = '#ef4444';
+        errorDiv.style.background = 'rgba(239,68,68,0.1)';
+        return;
+      }
+      
+      errorDiv.textContent = 'Connecting...';
+      errorDiv.style.display = 'block';
+      errorDiv.style.color = 'var(--text-secondary)';
+      errorDiv.style.background = 'var(--bg-tertiary)';
+      
+      const id = generateId();
+      
+      try {
+        const result = await electronAPI.connectEmail(id, config);
+        
+        if (result.success) {
+          const tab = {
+            id,
+            type: 'email-imap',
+            name: tabName,
+            url: '',
+            group,
+            partition: `email-${id}`,
+            badge: 0,
+            emailConfig: {
+              email: config.email,
+              provider: document.getElementById('email-provider').value
+            }
+          };
+          
+          tabs.push(tab);
+          saveTabs();
+          renderTabs();
+          setActiveTab(id);
+          closeEmailSetupModal();
+        } else {
+          errorDiv.textContent = `Failed to connect: ${result.error}`;
+          errorDiv.style.color = '#ef4444';
+          errorDiv.style.background = 'rgba(239,68,68,0.1)';
+        }
+      } catch (e) {
+        errorDiv.textContent = `Error: ${e.message}`;
+        errorDiv.style.color = '#ef4444';
+        errorDiv.style.background = 'rgba(239,68,68,0.1)';
+      }
+    }
+
+    // Add custom tab
+    async function addCustomTab() {
+      const name = document.getElementById('custom-name').value.trim();
+      const url = document.getElementById('custom-url').value.trim();
+      const group = document.getElementById('custom-group').value;
+
+      if (!name || !url) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      // Ensure URL has protocol
+      let finalUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        finalUrl = 'https://' + url;
+      }
+
+      const id = generateId();
+      const partition = await electronAPI.createTabSession(id);
+
+      const tab = {
+        id,
+        type: 'custom',
+        name,
+        url: finalUrl,
+        group,
+        partition,
+        badge: 0
+      };
+
+      tabs.push(tab);
+      saveTabs();
+      renderTabs();
+      setActiveTab(id);
+      closeAddModal();
+      hideCustomForm();
+
+      // Clear form
+      document.getElementById('custom-name').value = '';
+      document.getElementById('custom-url').value = '';
+      document.getElementById('custom-group').value = 'default';
+    }
 
     // Remove tab
     function removeTab(id, event) {
-      event.stopPropagation();
+      if (event) event.stopPropagation();
       electronAPI.removeTabSession(id);
       tabs = tabs.filter(t => t.id !== id);
       saveTabs();
@@ -716,120 +1784,332 @@
     function setActiveTab(id) {
       activeTabId = id;
       
-      // Update button states
       document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.id === id);
       });
       
-      // Update content visibility
       document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.toggle('active', content.dataset.id === id);
       });
       
-      // Hide/show welcome screen
       const welcome = document.getElementById('welcome-screen');
       welcome.style.display = tabs.length === 0 ? 'flex' : 'none';
     }
 
+    // Get tabs organized by group
+    function getTabsByGroup() {
+      const groups = {};
+      tabs.forEach((tab, index) => {
+        const group = tab.group || 'default';
+        if (!groups[group]) groups[group] = [];
+        groups[group].push({ ...tab, index });
+      });
+      return groups;
+    }
+
     // Render tabs
     function renderTabs() {
-      const buttonContainer = document.getElementById('tab-buttons');
+      const groupContainer = document.getElementById('tab-groups');
       const contentContainer = document.getElementById('tab-contents');
       
-      // Clear existing (except welcome)
-      buttonContainer.innerHTML = '';
+      groupContainer.innerHTML = '';
       contentContainer.querySelectorAll('.tab-content').forEach(el => el.remove());
       
-      // Render each tab
-      tabs.forEach(tab => {
-        const service = services[tab.type];
+      const tabsByGroup = getTabsByGroup();
+      const groupOrder = ['default', 'work', 'personal'];
+      
+      let globalIndex = 0;
+      
+      groupOrder.forEach(groupId => {
+        const groupTabs = tabsByGroup[groupId];
+        if (!groupTabs || groupTabs.length === 0) return;
         
-        // Button
-        const button = document.createElement('button');
-        button.className = `tab-button ${tab.type}`;
-        button.dataset.id = tab.id;
-        button.onclick = () => setActiveTab(tab.id);
-        button.innerHTML = `
-          ${service.icon}
-          <span class="close-tab" onclick="removeTab('${tab.id}', event)">×</span>
-        `;
-        buttonContainer.appendChild(button);
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'tab-group';
         
-        // Content
-        const content = document.createElement('div');
-        content.className = 'tab-content';
-        content.dataset.id = tab.id;
-        content.innerHTML = `
-          <div class="webview-wrapper">
-            <div class="webview-toolbar">
-              <button class="nav-btn" onclick="navigateBack('${tab.id}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-              </button>
-              <button class="nav-btn" onclick="navigateForward('${tab.id}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
-              <button class="nav-btn" onclick="reloadTab('${tab.id}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M23 4v6h-6M1 20v-6h6"/>
-                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                </svg>
-              </button>
-              <div class="url-display" id="url-${tab.id}">${service.url}</div>
-              <span class="tab-label ${tab.type}">${service.name}</span>
-            </div>
-            <webview 
-              id="webview-${tab.id}"
-              src="${service.url}"
-              partition="${tab.partition}"
-              allowpopups
-              useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            ></webview>
-          </div>
-        `;
-        contentContainer.appendChild(content);
+        // Only show group header if more than one group has tabs
+        const activeGroups = groupOrder.filter(g => tabsByGroup[g] && tabsByGroup[g].length > 0);
+        if (activeGroups.length > 1) {
+          const header = document.createElement('div');
+          header.className = 'tab-group-header';
+          header.textContent = groupNames[groupId];
+          groupDiv.appendChild(header);
+        }
         
-        // Setup webview events
-        const webview = content.querySelector('webview');
-        webview.addEventListener('did-navigate', (e) => {
-          document.getElementById(`url-${tab.id}`).textContent = e.url;
+        const tabsDiv = document.createElement('div');
+        tabsDiv.className = 'tab-group-tabs';
+        
+        groupTabs.forEach(tab => {
+          globalIndex++;
+          const service = services[tab.type];
+          const icon = tab.type === 'custom' || tab.type === 'email-imap' ? service.icon : service.icon;
+          
+          // Button
+          const button = document.createElement('button');
+          button.className = `tab-button ${tab.type}`;
+          button.dataset.id = tab.id;
+          button.onclick = () => setActiveTab(tab.id);
+          button.oncontextmenu = (e) => showContextMenu(e, tab.id);
+          button.innerHTML = `
+            ${icon}
+            <span class="tab-badge ${tab.badge > 0 ? 'visible' : ''}">${tab.badge}</span>
+            ${globalIndex <= 9 ? `<span class="tab-number">${globalIndex}</span>` : ''}
+            <span class="close-tab" onclick="removeTab('${tab.id}', event)">×</span>
+          `;
+          tabsDiv.appendChild(button);
+          
+          // Content - different for email vs webview tabs
+          const content = document.createElement('div');
+          content.className = 'tab-content';
+          content.dataset.id = tab.id;
+          
+          if (tab.type === 'email-imap') {
+            // Email UI
+            content.innerHTML = `
+              <div class="email-container">
+                <div class="email-sidebar">
+                  <div class="email-account-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--accent-custom);">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                      <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    <span>${tab.name}</span>
+                  </div>
+                  <div class="email-folders" id="folders-${tab.id}">
+                    <div class="email-folder active" onclick="loadFolder('${tab.id}', 'INBOX')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                      Inbox
+                    </div>
+                    <div class="email-folder" onclick="loadFolder('${tab.id}', '[Gmail]/Sent Mail')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      Sent
+                    </div>
+                    <div class="email-folder" onclick="loadFolder('${tab.id}', '[Gmail]/Drafts')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      Drafts
+                    </div>
+                    <div class="email-folder" onclick="loadFolder('${tab.id}', '[Gmail]/Trash')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      Trash
+                    </div>
+                  </div>
+                  <button class="compose-btn" onclick="showCompose('${tab.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Compose
+                  </button>
+                </div>
+                <div class="email-list" id="email-list-${tab.id}">
+                  <div class="email-loading">Loading emails...</div>
+                </div>
+                <div class="email-viewer" id="email-viewer-${tab.id}">
+                  <div class="email-placeholder">Select an email to read</div>
+                </div>
+              </div>
+            `;
+            contentContainer.appendChild(content);
+            
+            // Load emails after a short delay
+            setTimeout(() => loadEmails(tab.id), 500);
+          } else {
+            // Regular webview
+            content.innerHTML = `
+              <div class="webview-wrapper">
+                <div class="webview-toolbar">
+                  <button class="nav-btn" onclick="navigateBack('${tab.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  <button class="nav-btn" onclick="navigateForward('${tab.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                  <button class="nav-btn" onclick="reloadTab('${tab.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M23 4v6h-6M1 20v-6h6"/>
+                      <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                    </svg>
+                  </button>
+                  <div class="url-display" id="url-${tab.id}">${tab.url}</div>
+                  <span class="tab-label ${tab.type}" onclick="openRenameModal('${tab.id}')">${tab.name}</span>
+                </div>
+                <webview 
+                  id="webview-${tab.id}"
+                  src="${tab.url}"
+                  partition="${tab.partition}"
+                  allowpopups
+                  useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                ></webview>
+              </div>
+            `;
+            contentContainer.appendChild(content);
+            
+            // Setup webview events
+            const webview = content.querySelector('webview');
+            if (webview) {
+              webview.addEventListener('did-navigate', (e) => {
+                document.getElementById(`url-${tab.id}`).textContent = e.url;
+              });
+              webview.addEventListener('did-navigate-in-page', (e) => {
+                document.getElementById(`url-${tab.id}`).textContent = e.url;
+              });
+              
+              // Listen for title changes (for notification badges)
+              webview.addEventListener('page-title-updated', (e) => {
+                const match = e.title.match(/^\((\d+)\)/);
+                if (match) {
+                  updateBadge(tab.id, parseInt(match[1]));
+                } else {
+                  updateBadge(tab.id, 0);
+                }
+              });
+            }
+          }
+          
+          // Listen for title changes (for notification badges)
+          webview.addEventListener('page-title-updated', (e) => {
+            const match = e.title.match(/^\((\d+)\)/);
+            if (match) {
+              updateBadge(tab.id, parseInt(match[1]));
+            } else {
+              updateBadge(tab.id, 0);
+            }
+          });
         });
-        webview.addEventListener('did-navigate-in-page', (e) => {
-          document.getElementById(`url-${tab.id}`).textContent = e.url;
-        });
+        
+        groupDiv.appendChild(tabsDiv);
+        groupContainer.appendChild(groupDiv);
       });
       
-      // Show welcome if no tabs
       const welcome = document.getElementById('welcome-screen');
       welcome.style.display = tabs.length === 0 ? 'flex' : 'none';
+    }
+
+    // Update notification badge
+    function updateBadge(tabId, count) {
+      const tab = tabs.find(t => t.id === tabId);
+      if (tab) {
+        tab.badge = count;
+        const badge = document.querySelector(`.tab-button[data-id="${tabId}"] .tab-badge`);
+        if (badge) {
+          badge.textContent = count;
+          badge.classList.toggle('visible', count > 0);
+        }
+      }
     }
 
     // Navigation functions
     function navigateBack(tabId) {
       const webview = document.getElementById(`webview-${tabId}`);
-      if (webview.canGoBack()) webview.goBack();
+      if (webview && webview.canGoBack()) webview.goBack();
     }
 
     function navigateForward(tabId) {
       const webview = document.getElementById(`webview-${tabId}`);
-      if (webview.canGoForward()) webview.goForward();
+      if (webview && webview.canGoForward()) webview.goForward();
     }
 
     function reloadTab(tabId) {
       const webview = document.getElementById(`webview-${tabId}`);
-      webview.reload();
+      if (webview) webview.reload();
     }
 
     // Modal functions
     function openAddModal() {
       document.getElementById('add-modal').classList.add('active');
+      hideCustomForm();
     }
 
     function closeAddModal() {
       document.getElementById('add-modal').classList.remove('active');
+      hideCustomForm();
+    }
+
+    function showCustomForm() {
+      document.getElementById('custom-form').classList.add('active');
+    }
+
+    function hideCustomForm() {
+      document.getElementById('custom-form').classList.remove('active');
+    }
+
+    // Rename modal
+    function openRenameModal(tabId) {
+      renameTabId = tabId;
+      const tab = tabs.find(t => t.id === tabId);
+      if (tab) {
+        document.getElementById('rename-input').value = tab.name;
+        document.getElementById('rename-group').value = tab.group || 'default';
+        document.getElementById('rename-modal').classList.add('active');
+        document.getElementById('rename-input').focus();
+      }
+    }
+
+    function closeRenameModal() {
+      document.getElementById('rename-modal').classList.remove('active');
+      renameTabId = null;
+    }
+
+    function saveRename() {
+      if (!renameTabId) return;
+      const newName = document.getElementById('rename-input').value.trim();
+      const newGroup = document.getElementById('rename-group').value;
+      
+      if (newName) {
+        const tab = tabs.find(t => t.id === renameTabId);
+        if (tab) {
+          tab.name = newName;
+          tab.group = newGroup;
+          saveTabs();
+          renderTabs();
+          setActiveTab(activeTabId);
+        }
+      }
+      closeRenameModal();
+    }
+
+    // Context menu
+    function showContextMenu(e, tabId) {
+      e.preventDefault();
+      contextTabId = tabId;
+      const menu = document.getElementById('context-menu');
+      menu.style.left = e.clientX + 'px';
+      menu.style.top = e.clientY + 'px';
+      menu.classList.add('active');
+    }
+
+    function hideContextMenu() {
+      document.getElementById('context-menu').classList.remove('active');
+      contextTabId = null;
+    }
+
+    function renameCurrentTab() {
+      if (contextTabId) {
+        openRenameModal(contextTabId);
+      }
+      hideContextMenu();
+    }
+
+    function changeGroup() {
+      if (contextTabId) {
+        openRenameModal(contextTabId);
+      }
+      hideContextMenu();
+    }
+
+    function reloadCurrentTab() {
+      if (contextTabId) {
+        reloadTab(contextTabId);
+      }
+      hideContextMenu();
+    }
+
+    function closeCurrentTab() {
+      if (contextTabId) {
+        removeTab(contextTabId);
+      }
+      hideContextMenu();
     }
 
     // Save tabs
@@ -837,21 +2117,189 @@
       electronAPI.saveTabs(tabs.map(t => ({
         id: t.id,
         type: t.type,
-        partition: t.partition
+        name: t.name,
+        url: t.url,
+        group: t.group,
+        partition: t.partition,
+        badge: 0
       })));
     }
 
-    // Close modal on overlay click
-    document.getElementById('add-modal').addEventListener('click', (e) => {
+    // Event listeners
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.context-menu')) {
+        hideContextMenu();
+      }
       if (e.target.classList.contains('modal-overlay')) {
-        closeAddModal();
+        if (e.target.id === 'add-modal') closeAddModal();
+        if (e.target.id === 'rename-modal') closeRenameModal();
       }
     });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeAddModal();
+      // Escape - close modals
+      if (e.key === 'Escape') {
+        closeAddModal();
+        closeRenameModal();
+        hideContextMenu();
+      }
+      
+      // Ctrl+N - new tab
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        openAddModal();
+      }
+      
+      // Ctrl+W - close current tab
+      if (e.ctrlKey && e.key === 'w') {
+        e.preventDefault();
+        if (activeTabId) {
+          removeTab(activeTabId);
+        }
+      }
+      
+      // Ctrl+R - reload current tab
+      if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        if (activeTabId) {
+          reloadTab(activeTabId);
+        }
+      }
+      
+      // Ctrl+1-9 - switch tabs
+      if (e.ctrlKey && e.key >= '1' && e.key <= '9') {
+        e.preventDefault();
+        const index = parseInt(e.key) - 1;
+        if (index < tabs.length) {
+          setActiveTab(tabs[index].id);
+        }
+      }
+      
+      // Ctrl+Tab - next tab
+      if (e.ctrlKey && e.key === 'Tab') {
+        e.preventDefault();
+        const currentIndex = tabs.findIndex(t => t.id === activeTabId);
+        const nextIndex = e.shiftKey 
+          ? (currentIndex - 1 + tabs.length) % tabs.length
+          : (currentIndex + 1) % tabs.length;
+        if (tabs[nextIndex]) {
+          setActiveTab(tabs[nextIndex].id);
+        }
+      }
+      
+      // Enter in rename modal
+      if (e.key === 'Enter' && document.getElementById('rename-modal').classList.contains('active')) {
+        saveRename();
+      }
     });
+
+    // Email client functions
+    let currentEmails = {};
+    let selectedEmailId = {};
+
+    async function loadEmails(tabId, folder = 'INBOX') {
+      const listContainer = document.getElementById(`email-list-${tabId}`);
+      if (!listContainer) return;
+      
+      listContainer.innerHTML = '<div class="email-loading">Loading emails...</div>';
+      
+      try {
+        const result = await electronAPI.getEmails(tabId, folder, 50);
+        
+        if (result.success) {
+          currentEmails[tabId] = result.emails;
+          renderEmailList(tabId);
+        } else {
+          listContainer.innerHTML = `<div class="email-loading">Error: ${result.error}</div>`;
+        }
+      } catch (e) {
+        listContainer.innerHTML = `<div class="email-loading">Failed to load emails</div>`;
+      }
+    }
+
+    function loadFolder(tabId, folder) {
+      // Update folder selection UI
+      const folders = document.querySelectorAll(`#folders-${tabId} .email-folder`);
+      folders.forEach(f => f.classList.remove('active'));
+      event.target.closest('.email-folder').classList.add('active');
+      
+      loadEmails(tabId, folder);
+    }
+
+    function renderEmailList(tabId) {
+      const listContainer = document.getElementById(`email-list-${tabId}`);
+      const emails = currentEmails[tabId] || [];
+      
+      if (emails.length === 0) {
+        listContainer.innerHTML = '<div class="email-loading">No emails found</div>';
+        return;
+      }
+      
+      listContainer.innerHTML = emails.map(email => `
+        <div class="email-item ${email.isRead ? '' : 'unread'}" onclick="selectEmail('${tabId}', '${email.uid}')">
+          <span class="email-item-date">${formatDate(email.date)}</span>
+          <div class="email-item-from">${escapeHtml(email.from)}</div>
+          <div class="email-item-subject">${escapeHtml(email.subject)}</div>
+          <div class="email-item-preview">${escapeHtml((email.text || '').substring(0, 100))}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectEmail(tabId, uid) {
+      const emails = currentEmails[tabId] || [];
+      const email = emails.find(e => e.uid == uid);
+      if (!email) return;
+      
+      selectedEmailId[tabId] = uid;
+      
+      // Update list selection
+      const items = document.querySelectorAll(`#email-list-${tabId} .email-item`);
+      items.forEach(item => item.classList.remove('active'));
+      event.target.closest('.email-item').classList.add('active');
+      
+      // Show email
+      const viewer = document.getElementById(`email-viewer-${tabId}`);
+      viewer.innerHTML = `
+        <div class="email-header">
+          <div class="email-subject">${escapeHtml(email.subject)}</div>
+          <div class="email-meta">
+            <span><strong>From:</strong> ${escapeHtml(email.from)}</span>
+            <span><strong>Date:</strong> ${new Date(email.date).toLocaleString()}</span>
+          </div>
+        </div>
+        <div class="email-body">${email.html || escapeHtml(email.text || 'No content')}</div>
+      `;
+      
+      // Mark as read
+      electronAPI.markEmailRead(tabId, uid);
+    }
+
+    function showCompose(tabId) {
+      alert('Compose feature coming soon!');
+    }
+
+    function formatDate(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      const now = new Date();
+      const diff = now - d;
+      
+      if (diff < 86400000) { // Less than 24 hours
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else if (diff < 604800000) { // Less than 7 days
+        return d.toLocaleDateString([], { weekday: 'short' });
+      } else {
+        return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
 
     // Initialize
     init();
