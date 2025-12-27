@@ -1,48 +1,52 @@
 # Social Hub
 
-<p align="center">
-  <img src="assets/icon.svg" width="120" alt="Social Hub Logo">
-</p>
+A unified desktop application for managing multiple social media accounts and email in one place. Built with Electron.
 
-<p align="center">
-  <strong>A unified desktop app for managing social media messaging and analytics in one place.</strong>
-</p>
-
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#building">Building</a> •
-  <a href="#contributing">Contributing</a>
-</p>
-
----
+![Social Hub Messenger](screenshots/messenger.png)
 
 ## Features
 
-- **🗂️ Tab-based Interface** — Organize multiple services in separate tabs
-- **👥 Multi-account Support** — Run multiple accounts of the same service simultaneously
-- **🔐 Isolated Sessions** — Each tab maintains its own login session
-- **💾 Persistent Login** — Stay logged in across app restarts
-- **🖥️ Cross-platform** — Works on Windows and Linux
+- **Multi-Account Support** - Add multiple accounts for each service, each with isolated sessions
+- **Tab Groups** - Organize tabs into General, Work, and Personal groups
+- **Tab Renaming** - Customize tab names for easy identification
+- **Keyboard Shortcuts** - Quick navigation with Ctrl+1-9, Ctrl+N, Ctrl+W
+- **Notification Badges** - See unread counts at a glance
+- **Persistent Sessions** - Stay logged in across app restarts
 
-### Supported Services
+## Supported Services
 
-| Service | Type | Description |
-|---------|------|-------------|
-| **Messenger** | Chat | Facebook Messenger with full chat functionality |
-| **Instagram Chat** | Chat | Direct messages and comment management |
-| **Instagram Analytics** | Stats | Post insights, reach, and engagement metrics |
-| **TikTok Analytics** | Stats | Video performance and analytics |
+### Social
+- **Messenger** - Facebook chat & comments
+- **Instagram** - DMs, explore, and analytics
+- **TikTok** - Analytics and content management
+
+### Email
+- **Email (IMAP)** - Gmail, Outlook, Yahoo, iCloud with App Passwords
+- **Outlook Web** - Microsoft webmail
+
+### Custom
+- Add any website as a custom tab
+
+## Screenshots
+
+### Messenger
+![Messenger](screenshots/messenger.png)
+
+### Email (IMAP)
+![Email](screenshots/email.png)
+
+### Instagram
+![Instagram Explore](screenshots/instagram.png)
+
+### Instagram Analytics
+![Instagram Analytics](screenshots/instagram-analytics.png)
+
+### TikTok Analytics
+![TikTok Analytics](screenshots/tiktok.png)
 
 ## Installation
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 18 or higher
-- npm (comes with Node.js)
-
-### Quick Start
+### From Source
 
 ```bash
 # Clone the repository
@@ -56,119 +60,54 @@ npm install
 npm start
 ```
 
-## Usage
-
-1. **Launch the app** — Run `npm start` or use the built executable
-2. **Add a tab** — Click the `+` button in the sidebar
-3. **Choose a service** — Select Messenger, Instagram, or TikTok
-4. **Log in** — Each tab has its own session, so log in as needed
-5. **Switch tabs** — Click the icons in the sidebar to navigate
-
-### Tips
-
-- **Multiple accounts**: Add the same service multiple times with different logins
-- **Keyboard shortcuts**: Press `Esc` to close modals
-- **Navigation**: Use the back/forward/reload buttons in each tab's toolbar
-
-## Building
-
-Build distributable packages for your platform:
+### Build for Distribution
 
 ```bash
-# Build for your current platform
+# Build for current platform
 npm run build
 
-# Build for Windows (.exe installer)
-npm run build:win
-
-# Build for Linux (AppImage + .deb)
-npm run build:linux
-
-# Build for both platforms
-npm run build:all
+# Build for specific platforms
+npm run build:win    # Windows
+npm run build:linux  # Linux
 ```
 
-Built packages will be output to the `dist/` folder.
+## Keyboard Shortcuts
 
-### Linux Note
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+1-9` | Switch to tab 1-9 |
+| `Ctrl+N` | Add new tab |
+| `Ctrl+W` | Close current tab |
+| `Ctrl+R` | Reload current tab |
+| `Ctrl+Tab` | Next tab |
+| `Ctrl+Shift+Tab` | Previous tab |
 
-AppImages require FUSE to run. If you get a FUSE error:
+## Email Setup (IMAP)
 
-```bash
-# Arch Linux
-sudo pacman -S fuse2
+For Gmail and other providers that require app passwords:
 
-# Ubuntu/Debian
-sudo apt install fuse
-```
+1. Enable 2-Factor Authentication on your email account
+2. Generate an App Password:
+   - [Gmail App Passwords](https://myaccount.google.com/apppasswords)
+   - [Outlook App Passwords](https://account.live.com/proofs/AppPassword)
+3. Use the App Password in Social Hub (not your regular password)
 
-Or extract and run without FUSE:
+## Tech Stack
 
-```bash
-./Social\ Hub-*.AppImage --appimage-extract
-./squashfs-root/social-hub
-```
+- **Electron** - Cross-platform desktop framework
+- **Node.js** - Runtime
+- **IMAP/SMTP** - Email protocols via `imap` and `nodemailer`
 
-## Project Structure
+## Privacy
 
-```
-social-hub/
-├── package.json          # Dependencies and build configuration
-├── src/
-│   ├── main.js          # Electron main process
-│   ├── preload.js       # IPC bridge for secure communication
-│   └── index.html       # UI and renderer logic
-├── assets/
-│   └── icon.svg         # Application icon
-└── dist/                # Built packages (after running build)
-```
-
-## Customization
-
-### Adding More Services
-
-Edit the `services` object in `src/index.html`:
-
-```javascript
-const services = {
-  'your-service': {
-    name: 'Display Name',
-    url: 'https://service-url.com',
-    icon: `<svg>...</svg>`
-  }
-};
-```
-
-### Theming
-
-All styles are in `src/index.html`. Key CSS variables:
-
-```css
-:root {
-  --bg-deep: #08080c;
-  --bg-primary: #0c0c12;
-  --accent-messenger: #0084ff;
-  --accent-instagram: #e1306c;
-  /* ... */
-}
-```
-
-## Contributing
-
-Contributions are welcome! Feel free to:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- All login sessions are stored locally on your machine
+- Email credentials are saved in your user data directory
+- No data is sent to external servers (except to the services you connect to)
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
----
+## Contributing
 
-<p align="center">
-  Made with ☕ and Electron
-</p>
+Contributions are welcome! Please feel free to submit a Pull Request.
