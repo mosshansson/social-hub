@@ -53,15 +53,23 @@ class EmailClient {
         host: this.config.imap.host,
         port: this.config.imap.port,
         tls: this.config.imap.tls,
-        tlsOptions: { rejectUnauthorized: false }
+        tlsOptions: { rejectUnauthorized: false },
+        authTimeout: 10000
       });
 
+      const timeout = setTimeout(() => {
+        try { imap.end(); } catch(e) {}
+        reject({ success: false, error: 'Connection timeout' });
+      }, 15000);
+
       imap.once('ready', () => {
+        clearTimeout(timeout);
         imap.end();
         resolve({ success: true });
       });
 
       imap.once('error', (err) => {
+        clearTimeout(timeout);
         reject({ success: false, error: err.message });
       });
 
@@ -78,7 +86,13 @@ class EmailClient {
         host: this.config.imap.host,
         port: this.config.imap.port,
         tls: this.config.imap.tls,
-        tlsOptions: { rejectUnauthorized: false }
+        tlsOptions: { rejectUnauthorized: false },
+        authTimeout: 10000,
+        keepalive: {
+          interval: 10000,
+          idleInterval: 300000,
+          forceNoop: true
+        }
       });
 
       this.imap.once('ready', () => {
@@ -103,6 +117,10 @@ class EmailClient {
         reject({ success: false, error: err.message });
       });
 
+      this.imap.once('end', () => {
+        this.connected = false;
+      });
+
       this.imap.connect();
     });
   }
@@ -110,92 +128,210 @@ class EmailClient {
   // Disconnect
   disconnect() {
     if (this.imap) {
-      this.imap.end();
+      try {
+        this.imap.end();
+      } catch (e) {
+        // Ignore
+      }
       this.connected = false;
     }
   }
 
+  // Check if connected
+  isConnected() {
+    return this.connected && this.imap && this.imap.state === 'authenticated';
+  }
+
   // Get mailboxes/folders
   async getMailboxes() {
+    if (!this.isConnected()) {
+      throw new Error('Not connected');
+    }
+    
     return new Promise((resolve, reject) => {
       this.imap.getBoxes((err, boxes) => {
         if (err) reject(err);
-        else resolve(boxes);
+        else {
+          // Flatten the mailbox structure
+          const flatList = [];
+          const processBoxes = (boxes, prefix = '') => {
+            for (const [name, box] of Object.entries(boxes)) {
+              const fullName = prefix ? `${prefix}${box.delimiter}${name}` : name;
+              flatList.push({
+                name: name,
+                path: fullName,
+                delimiter: box.delimiter,
+                flags: box.attribs || [],
+                children: box.children ? Object.keys(box.children) : []
+              });
+              if (box.children) {
+                processBoxes(box.children, fullName);
+              }
+            }
+          };
+          processBoxes(boxes);
+          resolve(flatList);
+        }
       });
     });
   }
 
   // Get emails from a folder
-  async getEmails(folder = 'INBOX', limit = 50) {
+  async getEmails(folder = 'INBOX', limit = 100) {
+    if (!this.isConnected()) {
+      throw new Error('Not connected');
+    }
+
     return new Promise((resolve, reject) => {
-      this.imap.openBox(folder, true, (err, box) => {
+      this.imap.openBox(folder, true, async (err, box) => {
         if (err) {
           reject(err);
           return;
         }
 
         const total = box.messages.total;
+        if (total === 0) {
+          resolve([]);
+          return;
+        }
+
         const start = Math.max(1, total - limit + 1);
         const range = `${start}:${total}`;
-
-        const emails = [];
+        
+        const emailPromises = [];
+        
         const fetch = this.imap.seq.fetch(range, {
           bodies: '',
           struct: true
         });
 
         fetch.on('message', (msg, seqno) => {
-          let emailData = { seqno };
-          
-          msg.on('body', (stream) => {
+          // Create a promise for each message
+          const emailPromise = new Promise((resolveEmail) => {
             let buffer = '';
-            stream.on('data', (chunk) => {
-              buffer += chunk.toString('utf8');
+            let attributes = null;
+
+            msg.on('body', (stream) => {
+              stream.on('data', (chunk) => {
+                buffer += chunk.toString('utf8');
+              });
             });
-            stream.on('end', async () => {
+
+            msg.once('attributes', (attrs) => {
+              attributes = attrs;
+            });
+
+            msg.once('end', async () => {
               try {
                 const parsed = await simpleParser(buffer);
-                emailData = {
-                  ...emailData,
-                  id: parsed.messageId,
-                  from: parsed.from?.text || 'Unknown',
+                
+                // Extract sender name/email properly
+                let fromText = 'Unknown';
+                let fromFull = 'Unknown';
+                if (parsed.from && parsed.from.value && parsed.from.value.length > 0) {
+                  const sender = parsed.from.value[0];
+                  fromText = sender.name || sender.address || 'Unknown';
+                  fromFull = parsed.from.text || fromText;
+                } else if (parsed.from && parsed.from.text) {
+                  fromText = parsed.from.text;
+                  fromFull = fromText;
+                }
+
+                // Handle date properly
+                let emailDate = null;
+                if (parsed.date) {
+                  emailDate = parsed.date;
+                } else if (parsed.headers && parsed.headers.get('date')) {
+                  try {
+                    emailDate = new Date(parsed.headers.get('date'));
+                  } catch(e) {}
+                }
+                
+                // Fallback to internal date from IMAP
+                if (!emailDate || isNaN(new Date(emailDate).getTime())) {
+                  emailDate = attributes?.date || new Date();
+                }
+
+                // Get text content
+                let textContent = parsed.text || '';
+                let htmlContent = parsed.html || '';
+                
+                // If no text but has HTML, create text from HTML
+                if (!textContent && htmlContent) {
+                  textContent = htmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                }
+
+                const emailData = {
+                  seqno,
+                  uid: attributes?.uid,
+                  id: parsed.messageId || `msg-${seqno}`,
+                  from: fromText,
+                  fromFull: fromFull,
                   to: parsed.to?.text || '',
                   subject: parsed.subject || '(No Subject)',
-                  date: parsed.date,
-                  text: parsed.text || '',
-                  html: parsed.html || '',
+                  date: emailDate,
+                  text: textContent,
+                  html: htmlContent,
+                  flags: attributes?.flags || [],
+                  isRead: attributes?.flags?.includes('\\Seen') || false,
+                  isStarred: attributes?.flags?.includes('\\Flagged') || false,
+                  hasAttachments: (parsed.attachments || []).length > 0,
                   attachments: (parsed.attachments || []).map(a => ({
-                    filename: a.filename,
-                    size: a.size,
-                    contentType: a.contentType
+                    filename: a.filename || 'attachment',
+                    size: a.size || 0,
+                    contentType: a.contentType || 'application/octet-stream'
                   }))
                 };
+
+                resolveEmail(emailData);
               } catch (e) {
-                console.error('Parse error:', e);
+                console.error('Parse error for message', seqno, ':', e.message);
+                // Return a minimal email object on parse error
+                resolveEmail({
+                  seqno,
+                  uid: attributes?.uid,
+                  id: `msg-${seqno}`,
+                  from: 'Unknown',
+                  fromFull: 'Unknown',
+                  subject: '(Could not parse email)',
+                  date: attributes?.date || new Date(),
+                  text: '',
+                  html: '',
+                  flags: attributes?.flags || [],
+                  isRead: attributes?.flags?.includes('\\Seen') || false,
+                  isStarred: false,
+                  hasAttachments: false,
+                  attachments: []
+                });
               }
             });
           });
 
-          msg.once('attributes', (attrs) => {
-            emailData.uid = attrs.uid;
-            emailData.flags = attrs.flags;
-            emailData.isRead = attrs.flags.includes('\\Seen');
-            emailData.isStarred = attrs.flags.includes('\\Flagged');
-          });
-
-          msg.once('end', () => {
-            emails.push(emailData);
-          });
+          emailPromises.push(emailPromise);
         });
 
         fetch.once('error', (err) => {
           reject(err);
         });
 
-        fetch.once('end', () => {
-          // Sort by date descending
-          emails.sort((a, b) => new Date(b.date) - new Date(a.date));
-          resolve(emails);
+        fetch.once('end', async () => {
+          try {
+            // Wait for all emails to be parsed
+            const emails = await Promise.all(emailPromises);
+            
+            // Sort by date descending (newest first)
+            emails.sort((a, b) => {
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              if (isNaN(dateA.getTime())) return 1;
+              if (isNaN(dateB.getTime())) return -1;
+              return dateB - dateA;
+            });
+            
+            resolve(emails);
+          } catch (e) {
+            reject(e);
+          }
         });
       });
     });
@@ -220,6 +356,8 @@ class EmailClient {
 
   // Mark as read
   async markAsRead(uid) {
+    if (!this.isConnected()) return false;
+    
     return new Promise((resolve, reject) => {
       this.imap.addFlags(uid, ['\\Seen'], (err) => {
         if (err) reject(err);
@@ -230,6 +368,8 @@ class EmailClient {
 
   // Mark as unread
   async markAsUnread(uid) {
+    if (!this.isConnected()) return false;
+    
     return new Promise((resolve, reject) => {
       this.imap.delFlags(uid, ['\\Seen'], (err) => {
         if (err) reject(err);
@@ -238,8 +378,23 @@ class EmailClient {
     });
   }
 
-  // Delete email
+  // Star/unstar email
+  async toggleStar(uid, starred) {
+    if (!this.isConnected()) return false;
+    
+    return new Promise((resolve, reject) => {
+      const method = starred ? 'addFlags' : 'delFlags';
+      this.imap[method](uid, ['\\Flagged'], (err) => {
+        if (err) reject(err);
+        else resolve(true);
+      });
+    });
+  }
+
+  // Delete email (move to trash)
   async deleteEmail(uid) {
+    if (!this.isConnected()) return false;
+    
     return new Promise((resolve, reject) => {
       this.imap.addFlags(uid, ['\\Deleted'], (err) => {
         if (err) {

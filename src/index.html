@@ -1433,6 +1433,56 @@
       if (tabs.length > 0) {
         setActiveTab(tabs[0].id);
       }
+      
+      // Auto-reconnect email accounts
+      for (const tab of tabs) {
+        if (tab.type === 'email-imap') {
+          reconnectEmail(tab.id);
+        }
+      }
+    }
+    
+    // Reconnect email account from saved config
+    async function reconnectEmail(tabId) {
+      try {
+        const config = await electronAPI.getEmailConfig(tabId);
+        if (config) {
+          const result = await electronAPI.connectEmail(tabId, config);
+          if (result.success) {
+            // Reload emails after reconnect
+            setTimeout(() => loadEmails(tabId), 500);
+          } else {
+            console.log('Failed to reconnect email:', result.error);
+            // Show reconnect prompt in UI
+            showReconnectPrompt(tabId);
+          }
+        }
+      } catch (e) {
+        console.log('Email reconnect error:', e);
+      }
+    }
+    
+    // Show reconnect prompt for failed email connection
+    function showReconnectPrompt(tabId) {
+      const listContainer = document.getElementById(`email-list-${tabId}`);
+      if (listContainer) {
+        listContainer.innerHTML = `
+          <div class="email-loading" style="flex-direction: column; gap: 12px;">
+            <span>Session expired</span>
+            <button class="btn-primary" onclick="showEmailReconnect('${tabId}')" style="padding: 8px 16px; font-size: 12px;">
+              Reconnect
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    function showEmailReconnect(tabId) {
+      // For now, remove and re-add - could make a nicer reconnect modal later
+      const tab = tabs.find(t => t.id === tabId);
+      if (tab && tab.emailConfig) {
+        alert('Please remove this email tab and add it again to reconnect.');
+      }
     }
 
     // Generate unique ID
@@ -1909,7 +1959,7 @@
             contentContainer.appendChild(content);
             
             // Load emails after a short delay
-            setTimeout(() => loadEmails(tab.id), 500);
+            setTimeout(() => initEmailTab(tab.id), 500);
           } else {
             // Regular webview
             content.innerHTML = `
@@ -2187,24 +2237,152 @@
     // Email client functions
     let currentEmails = {};
     let selectedEmailId = {};
+    let currentFolder = {};
+
+    // Try to reconnect email on load
+    async function initEmailTab(tabId) {
+      const listContainer = document.getElementById(`email-list-${tabId}`);
+      if (!listContainer) return;
+      
+      listContainer.innerHTML = '<div class="email-loading">Connecting...</div>';
+      
+      // Check if already connected
+      const isConnected = await electronAPI.isEmailConnected(tabId);
+      
+      if (!isConnected) {
+        // Try to reconnect using saved credentials
+        const result = await electronAPI.reconnectEmail(tabId);
+        if (!result.success) {
+          listContainer.innerHTML = `
+            <div class="email-loading">
+              <p>Not connected</p>
+              <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                Session expired. Please remove this tab and add your email account again.
+              </p>
+            </div>
+          `;
+          return;
+        }
+      }
+      
+      // Load folders then emails
+      await loadFolders(tabId);
+      await loadEmails(tabId, 'INBOX');
+    }
+
+    async function loadFolders(tabId) {
+      try {
+        const result = await electronAPI.getMailboxes(tabId);
+        if (result.success) {
+          renderFolders(tabId, result.mailboxes);
+        }
+      } catch (e) {
+        console.error('Failed to load folders:', e);
+      }
+    }
+
+    function renderFolders(tabId, mailboxes) {
+      const foldersContainer = document.getElementById(`folders-${tabId}`);
+      if (!foldersContainer) return;
+      
+      // Find common folders
+      const findFolder = (names) => {
+        for (const name of names) {
+          const found = mailboxes.find(m => 
+            m.path.toLowerCase() === name.toLowerCase() ||
+            m.name.toLowerCase() === name.toLowerCase()
+          );
+          if (found) return found.path;
+        }
+        return null;
+      };
+      
+      const inbox = 'INBOX';
+      const sent = findFolder(['[Gmail]/Sent Mail', 'Sent', 'INBOX.Sent', 'Sent Items', 'Sent Messages']);
+      const drafts = findFolder(['[Gmail]/Drafts', 'Drafts', 'INBOX.Drafts', 'Draft']);
+      const trash = findFolder(['[Gmail]/Trash', 'Trash', 'INBOX.Trash', 'Deleted Items', 'Deleted']);
+      const spam = findFolder(['[Gmail]/Spam', 'Spam', 'INBOX.Spam', 'Junk', 'Junk E-mail']);
+      const starred = findFolder(['[Gmail]/Starred', 'Starred', 'Flagged']);
+      
+      let html = `
+        <div class="email-folder active" onclick="loadFolder('${tabId}', 'INBOX')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          Inbox
+        </div>
+      `;
+      
+      if (starred) {
+        html += `
+          <div class="email-folder" onclick="loadFolder('${tabId}', '${starred}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Starred
+          </div>
+        `;
+      }
+      
+      if (sent) {
+        html += `
+          <div class="email-folder" onclick="loadFolder('${tabId}', '${sent}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Sent
+          </div>
+        `;
+      }
+      
+      if (drafts) {
+        html += `
+          <div class="email-folder" onclick="loadFolder('${tabId}', '${drafts}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Drafts
+          </div>
+        `;
+      }
+      
+      if (spam) {
+        html += `
+          <div class="email-folder" onclick="loadFolder('${tabId}', '${spam}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Spam
+          </div>
+        `;
+      }
+      
+      if (trash) {
+        html += `
+          <div class="email-folder" onclick="loadFolder('${tabId}', '${trash}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Trash
+          </div>
+        `;
+      }
+      
+      foldersContainer.innerHTML = html;
+    }
 
     async function loadEmails(tabId, folder = 'INBOX') {
       const listContainer = document.getElementById(`email-list-${tabId}`);
       if (!listContainer) return;
       
+      currentFolder[tabId] = folder;
       listContainer.innerHTML = '<div class="email-loading">Loading emails...</div>';
       
+      // Clear viewer
+      const viewer = document.getElementById(`email-viewer-${tabId}`);
+      if (viewer) {
+        viewer.innerHTML = '<div class="email-placeholder">Select an email to read</div>';
+      }
+      
       try {
-        const result = await electronAPI.getEmails(tabId, folder, 50);
+        const result = await electronAPI.getEmails(tabId, folder, 100);
         
         if (result.success) {
           currentEmails[tabId] = result.emails;
           renderEmailList(tabId);
         } else {
-          listContainer.innerHTML = `<div class="email-loading">Error: ${result.error}</div>`;
+          listContainer.innerHTML = `<div class="email-loading" style="color: #ef4444;">Error: ${result.error}</div>`;
         }
       } catch (e) {
-        listContainer.innerHTML = `<div class="email-loading">Failed to load emails</div>`;
+        listContainer.innerHTML = `<div class="email-loading" style="color: #ef4444;">Failed to load emails</div>`;
       }
     }
 
@@ -2212,7 +2390,10 @@
       // Update folder selection UI
       const folders = document.querySelectorAll(`#folders-${tabId} .email-folder`);
       folders.forEach(f => f.classList.remove('active'));
-      event.target.closest('.email-folder').classList.add('active');
+      if (event && event.target) {
+        const folderEl = event.target.closest('.email-folder');
+        if (folderEl) folderEl.classList.add('active');
+      }
       
       loadEmails(tabId, folder);
     }
@@ -2222,18 +2403,23 @@
       const emails = currentEmails[tabId] || [];
       
       if (emails.length === 0) {
-        listContainer.innerHTML = '<div class="email-loading">No emails found</div>';
+        listContainer.innerHTML = '<div class="email-loading">No emails in this folder</div>';
         return;
       }
       
-      listContainer.innerHTML = emails.map(email => `
-        <div class="email-item ${email.isRead ? '' : 'unread'}" onclick="selectEmail('${tabId}', '${email.uid}')">
-          <span class="email-item-date">${formatDate(email.date)}</span>
-          <div class="email-item-from">${escapeHtml(email.from)}</div>
-          <div class="email-item-subject">${escapeHtml(email.subject)}</div>
-          <div class="email-item-preview">${escapeHtml((email.text || '').substring(0, 100))}</div>
-        </div>
-      `).join('');
+      listContainer.innerHTML = emails.map(email => {
+        const dateStr = formatDate(email.date);
+        const preview = (email.text || '').substring(0, 80).replace(/\n/g, ' ');
+        
+        return `
+          <div class="email-item ${email.isRead ? '' : 'unread'}" data-uid="${email.uid}" onclick="selectEmail('${tabId}', ${email.uid})">
+            <span class="email-item-date">${dateStr}</span>
+            <div class="email-item-from">${escapeHtml(email.from)}</div>
+            <div class="email-item-subject">${escapeHtml(email.subject)}${email.hasAttachments ? ' 📎' : ''}</div>
+            <div class="email-item-preview">${escapeHtml(preview)}</div>
+          </div>
+        `;
+      }).join('');
     }
 
     function selectEmail(tabId, uid) {
@@ -2245,24 +2431,52 @@
       
       // Update list selection
       const items = document.querySelectorAll(`#email-list-${tabId} .email-item`);
-      items.forEach(item => item.classList.remove('active'));
-      event.target.closest('.email-item').classList.add('active');
+      items.forEach(item => {
+        item.classList.toggle('active', item.dataset.uid == uid);
+      });
+      
+      // Format date nicely
+      let dateStr = 'Unknown date';
+      try {
+        const d = new Date(email.date);
+        if (!isNaN(d.getTime())) {
+          dateStr = d.toLocaleString();
+        }
+      } catch (e) {}
       
       // Show email
       const viewer = document.getElementById(`email-viewer-${tabId}`);
+      
+      // Determine content to show
+      let content = '';
+      if (email.html) {
+        // Sanitize HTML a bit - remove scripts
+        content = email.html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      } else if (email.text) {
+        content = `<pre style="white-space: pre-wrap; font-family: inherit;">${escapeHtml(email.text)}</pre>`;
+      } else {
+        content = '<p style="color: var(--text-muted);">No content</p>';
+      }
+      
       viewer.innerHTML = `
         <div class="email-header">
           <div class="email-subject">${escapeHtml(email.subject)}</div>
           <div class="email-meta">
-            <span><strong>From:</strong> ${escapeHtml(email.from)}</span>
-            <span><strong>Date:</strong> ${new Date(email.date).toLocaleString()}</span>
+            <span><strong>From:</strong> ${escapeHtml(email.fromFull || email.from)}</span>
+            <span><strong>Date:</strong> ${dateStr}</span>
+            ${email.to ? `<span><strong>To:</strong> ${escapeHtml(email.to)}</span>` : ''}
           </div>
+          ${email.hasAttachments ? `<div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">📎 ${email.attachments.length} attachment(s)</div>` : ''}
         </div>
-        <div class="email-body">${email.html || escapeHtml(email.text || 'No content')}</div>
+        <div class="email-body">${content}</div>
       `;
       
       // Mark as read
       electronAPI.markEmailRead(tabId, uid);
+      
+      // Update list item to show as read
+      const item = document.querySelector(`#email-list-${tabId} .email-item[data-uid="${uid}"]`);
+      if (item) item.classList.remove('unread');
     }
 
     function showCompose(tabId) {
@@ -2271,16 +2485,22 @@
 
     function formatDate(date) {
       if (!date) return '';
-      const d = new Date(date);
-      const now = new Date();
-      const diff = now - d;
-      
-      if (diff < 86400000) { // Less than 24 hours
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      } else if (diff < 604800000) { // Less than 7 days
-        return d.toLocaleDateString([], { weekday: 'short' });
-      } else {
-        return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+        
+        const now = new Date();
+        const diff = now - d;
+        
+        if (diff < 86400000) { // Less than 24 hours
+          return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else if (diff < 604800000) { // Less than 7 days
+          return d.toLocaleDateString([], { weekday: 'short' });
+        } else {
+          return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
+      } catch (e) {
+        return '';
       }
     }
 

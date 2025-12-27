@@ -324,6 +324,30 @@ ipcMain.handle('get-email-config', (event, tabId) => {
   return null;
 });
 
+// Reconnect email on app restart
+ipcMain.handle('reconnect-email', async (event, tabId) => {
+  const configPath = path.join(app.getPath('userData'), `email-${tabId}.json`);
+  try {
+    if (fs.existsSync(configPath)) {
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      const client = new EmailClient(config);
+      await client.connect();
+      emailClients.set(tabId, client);
+      return { success: true };
+    }
+  } catch (e) {
+    console.error('Failed to reconnect email:', e);
+    return { success: false, error: e.message || e.error };
+  }
+  return { success: false, error: 'No saved config' };
+});
+
+// Check if email is connected
+ipcMain.handle('is-email-connected', (event, tabId) => {
+  const client = emailClients.get(tabId);
+  return client ? client.isConnected() : false;
+});
+
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {

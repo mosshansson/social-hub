@@ -37,4 +37,6 @@ coverage/
 tmp/
 temp/
 *.tmp
-to-do/
+
+# Personal files
+todo/

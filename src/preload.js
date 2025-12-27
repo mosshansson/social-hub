@@ -24,6 +24,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getEmailPresets: () => ipcRenderer.invoke('get-email-presets'),
   testEmailConnection: (config) => ipcRenderer.invoke('test-email-connection', config),
   connectEmail: (tabId, config) => ipcRenderer.invoke('connect-email', tabId, config),
+  reconnectEmail: (tabId) => ipcRenderer.invoke('reconnect-email', tabId),
+  isEmailConnected: (tabId) => ipcRenderer.invoke('is-email-connected', tabId),
   getEmails: (tabId, folder, limit) => ipcRenderer.invoke('get-emails', tabId, folder, limit),
   getMailboxes: (tabId) => ipcRenderer.invoke('get-mailboxes', tabId),
   sendEmail: (tabId, to, subject, text, html) => ipcRenderer.invoke('send-email', tabId, to, subject, text, html),

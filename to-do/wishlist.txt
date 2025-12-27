@@ -1,0 +1,1 @@
+- "Error: Not Connected" on previously added gmail tab upon new launch
