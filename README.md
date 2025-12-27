@@ -2,8 +2,6 @@
 
 A unified desktop application for managing multiple social media accounts and email in one place. Built with Electron.
 
-![Social Hub Messenger](screenshots/messenger.png)
-
 ## Features
 
 - **Multi-Account Support** - Add multiple accounts for each service, each with isolated sessions
@@ -26,23 +24,6 @@ A unified desktop application for managing multiple social media accounts and em
 
 ### Custom
 - Add any website as a custom tab
-
-## Screenshots
-
-### Messenger
-![Messenger](screenshots/messenger.png)
-
-### Email (IMAP)
-![Email](screenshots/email.png)
-
-### Instagram
-![Instagram Explore](screenshots/instagram.png)
-
-### Instagram Analytics
-![Instagram Analytics](screenshots/instagram-analytics.png)
-
-### TikTok Analytics
-![TikTok Analytics](screenshots/tiktok.png)
 
 ## Installation
 
