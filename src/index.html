@@ -943,6 +943,61 @@
       font-size: 14px;
     }
 
+    .email-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .email-toolbar-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .email-toolbar-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .email-toolbar-btn.danger:hover {
+      background: #dc262622;
+      color: #ef4444;
+      border-color: #ef4444;
+    }
+
+    .email-toolbar-btn.primary {
+      background: var(--accent-custom);
+      border-color: var(--accent-custom);
+      color: white;
+    }
+
+    .email-toolbar-btn.primary:hover {
+      filter: brightness(1.1);
+    }
+
+    .email-toolbar-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .email-toolbar-divider {
+      width: 1px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
     .email-header {
       margin-bottom: 20px;
       padding-bottom: 16px;
@@ -961,6 +1016,7 @@
       gap: 16px;
       font-size: 13px;
       color: var(--text-secondary);
+      flex-wrap: wrap;
     }
 
     .email-body {
@@ -971,6 +1027,179 @@
 
     .email-body a {
       color: var(--accent-custom);
+    }
+
+    /* Compose Modal */
+    .compose-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compose-modal.active {
+      display: flex;
+    }
+
+    .compose-content {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      width: 600px;
+      max-width: 90vw;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .compose-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compose-header h3 {
+      margin: 0;
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+
+    .compose-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .compose-close:hover {
+      color: var(--text-primary);
+    }
+
+    .compose-body {
+      padding: 16px 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .compose-field {
+      margin-bottom: 12px;
+    }
+
+    .compose-field label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .compose-field input,
+    .compose-field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .compose-field textarea {
+      min-height: 200px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .compose-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .compose-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .compose-btn-cancel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .compose-btn-cancel:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .compose-btn-send {
+      background: var(--accent-custom);
+      border: none;
+      color: white;
+    }
+
+    .compose-btn-send:hover {
+      filter: brightness(1.1);
+    }
+
+    .compose-btn-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Email item actions on hover */
+    .email-item-actions {
+      display: none;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      gap: 4px;
+    }
+
+    .email-item:hover .email-item-actions {
+      display: flex;
+    }
+
+    .email-item:hover .email-item-date {
+      display: none;
+    }
+
+    .email-item {
+      position: relative;
+    }
+
+    .email-action-btn {
+      padding: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .email-action-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .email-action-btn svg {
+      width: 14px;
+      height: 14px;
+      display: block;
     }
   </style>
 </head>
@@ -1355,6 +1584,44 @@
         <p style="font-size: 11px; color: var(--text-muted); text-align: center;">
           <a href="#" onclick="electronAPI.openExternal('https://myaccount.google.com/apppasswords'); return false;" style="color: var(--accent-gmail);">How to get Gmail App Password</a>
         </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compose Email Modal -->
+  <div class="compose-modal" id="compose-modal">
+    <div class="compose-content">
+      <div class="compose-header">
+        <h3 id="compose-title">New Message</h3>
+        <button class="compose-close" onclick="closeCompose()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="compose-body">
+        <input type="hidden" id="compose-tab-id">
+        <input type="hidden" id="compose-reply-to-id">
+        <div class="compose-field">
+          <label>To</label>
+          <input type="email" id="compose-to" placeholder="recipient@example.com">
+        </div>
+        <div class="compose-field">
+          <label>Cc</label>
+          <input type="email" id="compose-cc" placeholder="cc@example.com (optional)">
+        </div>
+        <div class="compose-field">
+          <label>Subject</label>
+          <input type="text" id="compose-subject" placeholder="Subject">
+        </div>
+        <div class="compose-field">
+          <label>Message</label>
+          <textarea id="compose-body" placeholder="Write your message..."></textarea>
+        </div>
+      </div>
+      <div class="compose-footer">
+        <button class="compose-btn compose-btn-cancel" onclick="closeCompose()">Cancel</button>
+        <button class="compose-btn compose-btn-send" onclick="sendComposedEmail()" id="compose-send-btn">Send</button>
       </div>
     </div>
   </div>
@@ -2412,9 +2679,20 @@
         const preview = (email.text || '').substring(0, 80).replace(/\n/g, ' ');
         
         return `
-          <div class="email-item ${email.isRead ? '' : 'unread'}" data-uid="${email.uid}" onclick="selectEmail('${tabId}', ${email.uid})">
+          <div class="email-item ${email.isRead ? '' : 'unread'} ${email.isStarred ? 'starred' : ''}" data-uid="${email.uid}" onclick="selectEmail('${tabId}', ${email.uid})">
             <span class="email-item-date">${dateStr}</span>
-            <div class="email-item-from">${escapeHtml(email.from)}</div>
+            <div class="email-item-actions">
+              <button class="email-action-btn" onclick="event.stopPropagation(); toggleStarEmail('${tabId}', ${email.uid}, ${!email.isStarred})" title="${email.isStarred ? 'Unstar' : 'Star'}">
+                <svg viewBox="0 0 24 24" fill="${email.isStarred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+              <button class="email-action-btn" onclick="event.stopPropagation(); archiveEmailAction('${tabId}', ${email.uid})" title="Archive">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/></svg>
+              </button>
+              <button class="email-action-btn" onclick="event.stopPropagation(); trashEmailAction('${tabId}', ${email.uid})" title="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+            <div class="email-item-from">${email.isStarred ? '⭐ ' : ''}${escapeHtml(email.from)}</div>
             <div class="email-item-subject">${escapeHtml(email.subject)}${email.hasAttachments ? ' 📎' : ''}</div>
             <div class="email-item-preview">${escapeHtml(preview)}</div>
           </div>
@@ -2429,28 +2707,19 @@
       
       selectedEmailId[tabId] = uid;
       
-      // Update list selection
       const items = document.querySelectorAll(`#email-list-${tabId} .email-item`);
-      items.forEach(item => {
-        item.classList.toggle('active', item.dataset.uid == uid);
-      });
+      items.forEach(item => item.classList.toggle('active', item.dataset.uid == uid));
       
-      // Format date nicely
       let dateStr = 'Unknown date';
       try {
         const d = new Date(email.date);
-        if (!isNaN(d.getTime())) {
-          dateStr = d.toLocaleString();
-        }
+        if (!isNaN(d.getTime())) dateStr = d.toLocaleString();
       } catch (e) {}
       
-      // Show email
       const viewer = document.getElementById(`email-viewer-${tabId}`);
       
-      // Determine content to show
       let content = '';
       if (email.html) {
-        // Sanitize HTML a bit - remove scripts
         content = email.html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
       } else if (email.text) {
         content = `<pre style="white-space: pre-wrap; font-family: inherit;">${escapeHtml(email.text)}</pre>`;
@@ -2459,28 +2728,161 @@
       }
       
       viewer.innerHTML = `
+        <div class="email-toolbar">
+          <button class="email-toolbar-btn primary" onclick="replyToEmail('${tabId}', ${uid})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+            Reply
+          </button>
+          <button class="email-toolbar-btn" onclick="forwardEmail('${tabId}', ${uid})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
+            Forward
+          </button>
+          <div class="email-toolbar-divider"></div>
+          <button class="email-toolbar-btn" onclick="archiveEmailAction('${tabId}', ${uid})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/></svg>
+            Archive
+          </button>
+          <button class="email-toolbar-btn" onclick="spamEmailAction('${tabId}', ${uid})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            Spam
+          </button>
+          <button class="email-toolbar-btn danger" onclick="trashEmailAction('${tabId}', ${uid})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+          <div class="email-toolbar-divider"></div>
+          <button class="email-toolbar-btn" onclick="toggleReadStatus('${tabId}', ${uid}, ${email.isRead})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            ${email.isRead ? 'Unread' : 'Read'}
+          </button>
+          <button class="email-toolbar-btn" onclick="toggleStarEmail('${tabId}', ${uid}, ${!email.isStarred})">
+            <svg viewBox="0 0 24 24" fill="${email.isStarred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            ${email.isStarred ? 'Unstar' : 'Star'}
+          </button>
+        </div>
         <div class="email-header">
           <div class="email-subject">${escapeHtml(email.subject)}</div>
           <div class="email-meta">
             <span><strong>From:</strong> ${escapeHtml(email.fromFull || email.from)}</span>
             <span><strong>Date:</strong> ${dateStr}</span>
-            ${email.to ? `<span><strong>To:</strong> ${escapeHtml(email.to)}</span>` : ''}
           </div>
-          ${email.hasAttachments ? `<div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">📎 ${email.attachments.length} attachment(s)</div>` : ''}
+          ${email.to ? `<div class="email-meta"><span><strong>To:</strong> ${escapeHtml(email.to)}</span></div>` : ''}
+          ${email.cc ? `<div class="email-meta"><span><strong>Cc:</strong> ${escapeHtml(email.cc)}</span></div>` : ''}
+          ${email.hasAttachments ? `<div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">📎 ${email.attachments.map(a => a.filename).join(', ')}</div>` : ''}
         </div>
         <div class="email-body">${content}</div>
       `;
       
-      // Mark as read
-      electronAPI.markEmailRead(tabId, uid);
-      
-      // Update list item to show as read
-      const item = document.querySelector(`#email-list-${tabId} .email-item[data-uid="${uid}"]`);
-      if (item) item.classList.remove('unread');
+      if (!email.isRead) {
+        electronAPI.markEmailRead(tabId, uid, currentFolder[tabId]);
+        email.isRead = true;
+        const item = document.querySelector(`#email-list-${tabId} .email-item[data-uid="${uid}"]`);
+        if (item) item.classList.remove('unread');
+      }
     }
 
-    function showCompose(tabId) {
-      alert('Compose feature coming soon!');
+    function showCompose(tabId, replyTo = null, forward = null) {
+      document.getElementById('compose-modal').classList.add('active');
+      document.getElementById('compose-tab-id').value = tabId;
+      document.getElementById('compose-reply-to-id').value = replyTo?.id || '';
+      document.getElementById('compose-cc').value = '';
+      
+      if (replyTo) {
+        document.getElementById('compose-title').textContent = 'Reply';
+        document.getElementById('compose-to').value = replyTo.replyTo || replyTo.fromEmail || '';
+        document.getElementById('compose-subject').value = replyTo.subject.startsWith('Re:') ? replyTo.subject : `Re: ${replyTo.subject}`;
+        document.getElementById('compose-body').value = `\n\n--- Original Message ---\nFrom: ${replyTo.fromFull}\nDate: ${new Date(replyTo.date).toLocaleString()}\n\n${replyTo.text || ''}`;
+      } else if (forward) {
+        document.getElementById('compose-title').textContent = 'Forward';
+        document.getElementById('compose-to').value = '';
+        document.getElementById('compose-subject').value = forward.subject.startsWith('Fwd:') ? forward.subject : `Fwd: ${forward.subject}`;
+        document.getElementById('compose-body').value = `\n\n--- Forwarded Message ---\nFrom: ${forward.fromFull}\nDate: ${new Date(forward.date).toLocaleString()}\nSubject: ${forward.subject}\n\n${forward.text || ''}`;
+      } else {
+        document.getElementById('compose-title').textContent = 'New Message';
+        document.getElementById('compose-to').value = '';
+        document.getElementById('compose-subject').value = '';
+        document.getElementById('compose-body').value = '';
+      }
+    }
+
+    function closeCompose() {
+      document.getElementById('compose-modal').classList.remove('active');
+    }
+
+    async function sendComposedEmail() {
+      const tabId = document.getElementById('compose-tab-id').value;
+      const to = document.getElementById('compose-to').value.trim();
+      const cc = document.getElementById('compose-cc').value.trim();
+      const subject = document.getElementById('compose-subject').value.trim();
+      const body = document.getElementById('compose-body').value;
+      
+      if (!to) { alert('Please enter a recipient'); return; }
+      
+      const sendBtn = document.getElementById('compose-send-btn');
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+      
+      try {
+        const result = await electronAPI.sendEmail(tabId, { to, cc, subject, text: body, html: body.replace(/\n/g, '<br>') });
+        if (result.success) { closeCompose(); alert('Email sent!'); }
+        else { alert('Failed: ' + result.error); }
+      } catch (e) { alert('Error: ' + e.message); }
+      finally { sendBtn.disabled = false; sendBtn.textContent = 'Send'; }
+    }
+
+    function replyToEmail(tabId, uid) {
+      const email = (currentEmails[tabId] || []).find(e => e.uid == uid);
+      if (email) showCompose(tabId, email, null);
+    }
+
+    function forwardEmail(tabId, uid) {
+      const email = (currentEmails[tabId] || []).find(e => e.uid == uid);
+      if (email) showCompose(tabId, null, email);
+    }
+
+    async function toggleReadStatus(tabId, uid, isRead) {
+      try {
+        if (isRead) await electronAPI.markEmailUnread(tabId, uid, currentFolder[tabId]);
+        else await electronAPI.markEmailRead(tabId, uid, currentFolder[tabId]);
+        const email = (currentEmails[tabId] || []).find(e => e.uid == uid);
+        if (email) { email.isRead = !isRead; renderEmailList(tabId); selectEmail(tabId, uid); }
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    async function toggleStarEmail(tabId, uid, star) {
+      try {
+        if (star) await electronAPI.starEmail(tabId, uid, currentFolder[tabId]);
+        else await electronAPI.unstarEmail(tabId, uid, currentFolder[tabId]);
+        const email = (currentEmails[tabId] || []).find(e => e.uid == uid);
+        if (email) { email.isStarred = star; renderEmailList(tabId); if (selectedEmailId[tabId] == uid) selectEmail(tabId, uid); }
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    async function archiveEmailAction(tabId, uid) {
+      try {
+        await electronAPI.archiveEmail(tabId, uid, currentFolder[tabId]);
+        currentEmails[tabId] = (currentEmails[tabId] || []).filter(e => e.uid != uid);
+        renderEmailList(tabId);
+        document.getElementById(`email-viewer-${tabId}`).innerHTML = '<div class="email-placeholder">Email archived</div>';
+      } catch (e) { alert('Archive failed: ' + e.message); }
+    }
+
+    async function trashEmailAction(tabId, uid) {
+      try {
+        await electronAPI.trashEmail(tabId, uid, currentFolder[tabId]);
+        currentEmails[tabId] = (currentEmails[tabId] || []).filter(e => e.uid != uid);
+        renderEmailList(tabId);
+        document.getElementById(`email-viewer-${tabId}`).innerHTML = '<div class="email-placeholder">Email deleted</div>';
+      } catch (e) { alert('Delete failed: ' + e.message); }
+    }
+
+    async function spamEmailAction(tabId, uid) {
+      try {
+        await electronAPI.spamEmail(tabId, uid, currentFolder[tabId]);
+        currentEmails[tabId] = (currentEmails[tabId] || []).filter(e => e.uid != uid);
+        renderEmailList(tabId);
+        document.getElementById(`email-viewer-${tabId}`).innerHTML = '<div class="email-placeholder">Marked as spam</div>';
+      } catch (e) { alert('Failed: ' + e.message); }
     }
 
     function formatDate(date) {

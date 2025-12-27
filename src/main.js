@@ -267,36 +267,120 @@ ipcMain.handle('get-mailboxes', async (event, tabId) => {
   }
 });
 
-ipcMain.handle('send-email', async (event, tabId, to, subject, text, html) => {
+ipcMain.handle('send-email', async (event, tabId, options) => {
   const client = emailClients.get(tabId);
   if (!client) return { success: false, error: 'Not connected' };
   
   try {
-    await client.sendEmail(to, subject, text, html);
+    await client.sendEmail(options);
     return { success: true };
   } catch (e) {
     return { success: false, error: e.message };
   }
 });
 
-ipcMain.handle('mark-email-read', async (event, tabId, uid) => {
+ipcMain.handle('mark-email-read', async (event, tabId, uid, folder) => {
   const client = emailClients.get(tabId);
   if (!client) return { success: false, error: 'Not connected' };
   
   try {
-    await client.markAsRead(uid);
+    await client.markAsRead(uid, folder);
     return { success: true };
   } catch (e) {
     return { success: false, error: e.message };
   }
 });
 
-ipcMain.handle('delete-email', async (event, tabId, uid) => {
+ipcMain.handle('mark-email-unread', async (event, tabId, uid, folder) => {
   const client = emailClients.get(tabId);
   if (!client) return { success: false, error: 'Not connected' };
   
   try {
-    await client.deleteEmail(uid);
+    await client.markAsUnread(uid, folder);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('star-email', async (event, tabId, uid, folder) => {
+  const client = emailClients.get(tabId);
+  if (!client) return { success: false, error: 'Not connected' };
+  
+  try {
+    await client.starEmail(uid, folder);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('unstar-email', async (event, tabId, uid, folder) => {
+  const client = emailClients.get(tabId);
+  if (!client) return { success: false, error: 'Not connected' };
+  
+  try {
+    await client.unstarEmail(uid, folder);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('archive-email', async (event, tabId, uid, folder) => {
+  const client = emailClients.get(tabId);
+  if (!client) return { success: false, error: 'Not connected' };
+  
+  try {
+    await client.archiveEmail(uid, folder);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('trash-email', async (event, tabId, uid, folder) => {
+  const client = emailClients.get(tabId);
+  if (!client) return { success: false, error: 'Not connected' };
+  
+  try {
+    await client.trashEmail(uid, folder);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('spam-email', async (event, tabId, uid, folder) => {
+  const client = emailClients.get(tabId);
+  if (!client) return { success: false, error: 'Not connected' };
+  
+  try {
+    await client.spamEmail(uid, folder);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('move-email', async (event, tabId, uid, destFolder, srcFolder) => {
+  const client = emailClients.get(tabId);
+  if (!client) return { success: false, error: 'Not connected' };
+  
+  try {
+    await client.moveEmail(uid, destFolder, srcFolder);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('delete-email', async (event, tabId, uid, folder) => {
+  const client = emailClients.get(tabId);
+  if (!client) return { success: false, error: 'Not connected' };
+  
+  try {
+    await client.deleteEmail(uid, folder);
     return { success: true };
   } catch (e) {
     return { success: false, error: e.message };
@@ -332,6 +416,8 @@ ipcMain.handle('reconnect-email', async (event, tabId) => {
       const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
       const client = new EmailClient(config);
       await client.connect();
+      // Cache folders for special folder lookup
+      await client.getMailboxes();
       emailClients.set(tabId, client);
       return { success: true };
     }

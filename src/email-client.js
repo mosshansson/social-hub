@@ -8,31 +8,67 @@ const PROVIDER_PRESETS = {
     name: 'Gmail',
     imap: { host: 'imap.gmail.com', port: 993, tls: true },
     smtp: { host: 'smtp.gmail.com', port: 587, secure: false },
-    note: 'Requires App Password (enable 2FA first)'
+    note: 'Requires App Password (enable 2FA first)',
+    folders: {
+      sent: '[Gmail]/Sent Mail',
+      drafts: '[Gmail]/Drafts',
+      trash: '[Gmail]/Trash',
+      spam: '[Gmail]/Spam',
+      archive: '[Gmail]/All Mail',
+      starred: '[Gmail]/Starred'
+    }
   },
   'outlook': {
     name: 'Outlook/Hotmail',
     imap: { host: 'outlook.office365.com', port: 993, tls: true },
     smtp: { host: 'smtp.office365.com', port: 587, secure: false },
-    note: 'Use your regular password or App Password'
+    note: 'Use your regular password or App Password',
+    folders: {
+      sent: 'Sent',
+      drafts: 'Drafts',
+      trash: 'Deleted',
+      spam: 'Junk',
+      archive: 'Archive'
+    }
   },
   'yahoo': {
     name: 'Yahoo Mail',
     imap: { host: 'imap.mail.yahoo.com', port: 993, tls: true },
     smtp: { host: 'smtp.mail.yahoo.com', port: 587, secure: false },
-    note: 'Requires App Password'
+    note: 'Requires App Password',
+    folders: {
+      sent: 'Sent',
+      drafts: 'Draft',
+      trash: 'Trash',
+      spam: 'Bulk Mail',
+      archive: 'Archive'
+    }
   },
   'icloud': {
     name: 'iCloud Mail',
     imap: { host: 'imap.mail.me.com', port: 993, tls: true },
     smtp: { host: 'smtp.mail.me.com', port: 587, secure: false },
-    note: 'Requires App-Specific Password'
+    note: 'Requires App-Specific Password',
+    folders: {
+      sent: 'Sent Messages',
+      drafts: 'Drafts',
+      trash: 'Deleted Messages',
+      spam: 'Junk',
+      archive: 'Archive'
+    }
   },
   'custom': {
     name: 'Custom IMAP/SMTP',
     imap: { host: '', port: 993, tls: true },
     smtp: { host: '', port: 587, secure: false },
-    note: 'Enter your server details manually'
+    note: 'Enter your server details manually',
+    folders: {
+      sent: 'Sent',
+      drafts: 'Drafts',
+      trash: 'Trash',
+      spam: 'Spam',
+      archive: 'Archive'
+    }
   }
 };
 
@@ -42,6 +78,8 @@ class EmailClient {
     this.imap = null;
     this.transporter = null;
     this.connected = false;
+    this.currentBox = null;
+    this.folderCache = null;
   }
 
   // Test connection
@@ -170,7 +208,53 @@ class EmailClient {
             }
           };
           processBoxes(boxes);
+          this.folderCache = flatList;
           resolve(flatList);
+        }
+      });
+    });
+  }
+
+  // Find special folder path
+  findSpecialFolder(type) {
+    const providerFolders = PROVIDER_PRESETS[this.config.provider]?.folders || {};
+    const defaultPath = providerFolders[type];
+    
+    if (!this.folderCache) return defaultPath;
+    
+    // Try to find the folder
+    const searchNames = {
+      trash: ['Trash', 'Deleted', 'Deleted Items', 'Deleted Messages', '[Gmail]/Trash'],
+      archive: ['Archive', 'All Mail', '[Gmail]/All Mail'],
+      spam: ['Spam', 'Junk', 'Junk E-mail', 'Bulk Mail', '[Gmail]/Spam'],
+      sent: ['Sent', 'Sent Items', 'Sent Messages', 'Sent Mail', '[Gmail]/Sent Mail'],
+      drafts: ['Drafts', 'Draft', '[Gmail]/Drafts']
+    };
+    
+    const names = searchNames[type] || [defaultPath];
+    for (const name of names) {
+      const found = this.folderCache.find(f => 
+        f.path.toLowerCase() === name.toLowerCase() ||
+        f.name.toLowerCase() === name.toLowerCase()
+      );
+      if (found) return found.path;
+    }
+    
+    return defaultPath;
+  }
+
+  // Open a mailbox
+  async openBox(folder, readOnly = false) {
+    if (!this.isConnected()) {
+      throw new Error('Not connected');
+    }
+    
+    return new Promise((resolve, reject) => {
+      this.imap.openBox(folder, readOnly, (err, box) => {
+        if (err) reject(err);
+        else {
+          this.currentBox = folder;
+          resolve(box);
         }
       });
     });
@@ -188,7 +272,8 @@ class EmailClient {
           reject(err);
           return;
         }
-
+        
+        this.currentBox = folder;
         const total = box.messages.total;
         if (total === 0) {
           resolve([]);
@@ -206,7 +291,6 @@ class EmailClient {
         });
 
         fetch.on('message', (msg, seqno) => {
-          // Create a promise for each message
           const emailPromise = new Promise((resolveEmail) => {
             let buffer = '';
             let attributes = null;
@@ -225,19 +309,19 @@ class EmailClient {
               try {
                 const parsed = await simpleParser(buffer);
                 
-                // Extract sender name/email properly
                 let fromText = 'Unknown';
                 let fromFull = 'Unknown';
+                let fromEmail = '';
                 if (parsed.from && parsed.from.value && parsed.from.value.length > 0) {
                   const sender = parsed.from.value[0];
                   fromText = sender.name || sender.address || 'Unknown';
                   fromFull = parsed.from.text || fromText;
+                  fromEmail = sender.address || '';
                 } else if (parsed.from && parsed.from.text) {
                   fromText = parsed.from.text;
                   fromFull = fromText;
                 }
 
-                // Handle date properly
                 let emailDate = null;
                 if (parsed.date) {
                   emailDate = parsed.date;
@@ -247,18 +331,21 @@ class EmailClient {
                   } catch(e) {}
                 }
                 
-                // Fallback to internal date from IMAP
                 if (!emailDate || isNaN(new Date(emailDate).getTime())) {
                   emailDate = attributes?.date || new Date();
                 }
 
-                // Get text content
                 let textContent = parsed.text || '';
                 let htmlContent = parsed.html || '';
                 
-                // If no text but has HTML, create text from HTML
                 if (!textContent && htmlContent) {
                   textContent = htmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                }
+
+                // Extract reply-to
+                let replyTo = fromEmail;
+                if (parsed.replyTo && parsed.replyTo.value && parsed.replyTo.value.length > 0) {
+                  replyTo = parsed.replyTo.value[0].address || fromEmail;
                 }
 
                 const emailData = {
@@ -267,7 +354,10 @@ class EmailClient {
                   id: parsed.messageId || `msg-${seqno}`,
                   from: fromText,
                   fromFull: fromFull,
+                  fromEmail: fromEmail,
+                  replyTo: replyTo,
                   to: parsed.to?.text || '',
+                  cc: parsed.cc?.text || '',
                   subject: parsed.subject || '(No Subject)',
                   date: emailDate,
                   text: textContent,
@@ -286,13 +376,13 @@ class EmailClient {
                 resolveEmail(emailData);
               } catch (e) {
                 console.error('Parse error for message', seqno, ':', e.message);
-                // Return a minimal email object on parse error
                 resolveEmail({
                   seqno,
                   uid: attributes?.uid,
                   id: `msg-${seqno}`,
                   from: 'Unknown',
                   fromFull: 'Unknown',
+                  fromEmail: '',
                   subject: '(Could not parse email)',
                   date: attributes?.date || new Date(),
                   text: '',
@@ -316,10 +406,7 @@ class EmailClient {
 
         fetch.once('end', async () => {
           try {
-            // Wait for all emails to be parsed
             const emails = await Promise.all(emailPromises);
-            
-            // Sort by date descending (newest first)
             emails.sort((a, b) => {
               const dateA = new Date(a.date);
               const dateB = new Date(b.date);
@@ -327,7 +414,6 @@ class EmailClient {
               if (isNaN(dateB.getTime())) return -1;
               return dateB - dateA;
             });
-            
             resolve(emails);
           } catch (e) {
             reject(e);
@@ -338,25 +424,34 @@ class EmailClient {
   }
 
   // Send email
-  async sendEmail(to, subject, text, html = null) {
+  async sendEmail(options) {
     if (!this.transporter) {
       throw new Error('Not connected');
     }
 
     const mailOptions = {
       from: this.config.email,
-      to,
-      subject,
-      text,
-      html: html || text
+      to: options.to,
+      cc: options.cc || '',
+      bcc: options.bcc || '',
+      subject: options.subject,
+      text: options.text,
+      html: options.html || options.text,
+      inReplyTo: options.inReplyTo || '',
+      references: options.references || ''
     };
 
-    return this.transporter.sendMail(mailOptions);
+    const result = await this.transporter.sendMail(mailOptions);
+    return result;
   }
 
   // Mark as read
-  async markAsRead(uid) {
+  async markAsRead(uid, folder = null) {
     if (!this.isConnected()) return false;
+    
+    if (folder && folder !== this.currentBox) {
+      await this.openBox(folder, false);
+    }
     
     return new Promise((resolve, reject) => {
       this.imap.addFlags(uid, ['\\Seen'], (err) => {
@@ -367,8 +462,12 @@ class EmailClient {
   }
 
   // Mark as unread
-  async markAsUnread(uid) {
+  async markAsUnread(uid, folder = null) {
     if (!this.isConnected()) return false;
+    
+    if (folder && folder !== this.currentBox) {
+      await this.openBox(folder, false);
+    }
     
     return new Promise((resolve, reject) => {
       this.imap.delFlags(uid, ['\\Seen'], (err) => {
@@ -378,22 +477,104 @@ class EmailClient {
     });
   }
 
-  // Star/unstar email
-  async toggleStar(uid, starred) {
+  // Star email
+  async starEmail(uid, folder = null) {
     if (!this.isConnected()) return false;
     
+    if (folder && folder !== this.currentBox) {
+      await this.openBox(folder, false);
+    }
+    
     return new Promise((resolve, reject) => {
-      const method = starred ? 'addFlags' : 'delFlags';
-      this.imap[method](uid, ['\\Flagged'], (err) => {
+      this.imap.addFlags(uid, ['\\Flagged'], (err) => {
         if (err) reject(err);
         else resolve(true);
       });
     });
   }
 
-  // Delete email (move to trash)
-  async deleteEmail(uid) {
+  // Unstar email
+  async unstarEmail(uid, folder = null) {
     if (!this.isConnected()) return false;
+    
+    if (folder && folder !== this.currentBox) {
+      await this.openBox(folder, false);
+    }
+    
+    return new Promise((resolve, reject) => {
+      this.imap.delFlags(uid, ['\\Flagged'], (err) => {
+        if (err) reject(err);
+        else resolve(true);
+      });
+    });
+  }
+
+  // Move email to folder
+  async moveEmail(uid, destFolder, srcFolder = null) {
+    if (!this.isConnected()) return false;
+    
+    if (srcFolder && srcFolder !== this.currentBox) {
+      await this.openBox(srcFolder, false);
+    }
+    
+    return new Promise((resolve, reject) => {
+      this.imap.move(uid, destFolder, (err) => {
+        if (err) reject(err);
+        else resolve(true);
+      });
+    });
+  }
+
+  // Copy email to folder
+  async copyEmail(uid, destFolder, srcFolder = null) {
+    if (!this.isConnected()) return false;
+    
+    if (srcFolder && srcFolder !== this.currentBox) {
+      await this.openBox(srcFolder, false);
+    }
+    
+    return new Promise((resolve, reject) => {
+      this.imap.copy(uid, destFolder, (err) => {
+        if (err) reject(err);
+        else resolve(true);
+      });
+    });
+  }
+
+  // Archive email (move to archive folder)
+  async archiveEmail(uid, srcFolder = null) {
+    const archiveFolder = this.findSpecialFolder('archive');
+    if (!archiveFolder) {
+      throw new Error('Archive folder not found');
+    }
+    return this.moveEmail(uid, archiveFolder, srcFolder);
+  }
+
+  // Move to trash
+  async trashEmail(uid, srcFolder = null) {
+    const trashFolder = this.findSpecialFolder('trash');
+    if (!trashFolder) {
+      throw new Error('Trash folder not found');
+    }
+    return this.moveEmail(uid, trashFolder, srcFolder);
+  }
+
+  // Mark as spam
+  async spamEmail(uid, srcFolder = null) {
+    const spamFolder = this.findSpecialFolder('spam');
+    if (!spamFolder) {
+      throw new Error('Spam folder not found');
+    }
+    return this.moveEmail(uid, spamFolder, srcFolder);
+  }
+
+  // Permanently delete email
+  async deleteEmail(uid, folder = null) {
+    if (!this.isConnected()) return false;
+    
+    if (folder && folder !== this.currentBox) {
+      await this.openBox(folder, false);
+    }
     
     return new Promise((resolve, reject) => {
       this.imap.addFlags(uid, ['\\Deleted'], (err) => {
