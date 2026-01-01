@@ -1,1 +1,3 @@
 - "Error: Not Connected" on previously added gmail tab upon new launch
+- EMAIL: new message number bubble not existing
+- EMAIL: adapt the title to always show the bar (star,archive,delete) and make it more visable

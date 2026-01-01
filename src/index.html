@@ -911,6 +911,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      padding-right: 100px; /* Make room for action buttons */
     }
 
     .email-item-preview {
@@ -1184,16 +1185,18 @@
 
     .email-action-btn {
       padding: 6px;
-      background: var(--bg-card);
+      background: var(--bg-primary);
       border: 1px solid var(--border);
       border-radius: 4px;
-      color: var(--text-muted);
+      color: #a0a0a0; /* More visible - between title and preview colors */
       cursor: pointer;
+      transition: all 0.15s;
     }
 
     .email-action-btn:hover {
       background: var(--bg-hover);
       color: var(--text-primary);
+      border-color: #606060;
     }
 
     .email-action-btn svg {
@@ -2645,6 +2648,12 @@
         if (result.success) {
           currentEmails[tabId] = result.emails;
           renderEmailList(tabId);
+          
+          // Update unread badge for INBOX
+          if (folder === 'INBOX') {
+            const unreadCount = result.emails.filter(e => !e.isRead).length;
+            updateBadge(tabId, unreadCount);
+          }
         } else {
           listContainer.innerHTML = `<div class="email-loading" style="color: #ef4444;">Error: ${result.error}</div>`;
         }
@@ -2778,7 +2787,16 @@
         email.isRead = true;
         const item = document.querySelector(`#email-list-${tabId} .email-item[data-uid="${uid}"]`);
         if (item) item.classList.remove('unread');
+        // Update unread badge
+        updateEmailBadge(tabId);
       }
+    }
+
+    // Update email badge based on current unread count
+    function updateEmailBadge(tabId) {
+      const emails = currentEmails[tabId] || [];
+      const unreadCount = emails.filter(e => !e.isRead).length;
+      updateBadge(tabId, unreadCount);
     }
 
     function showCompose(tabId, replyTo = null, forward = null) {
@@ -2845,7 +2863,7 @@
         if (isRead) await electronAPI.markEmailUnread(tabId, uid, currentFolder[tabId]);
         else await electronAPI.markEmailRead(tabId, uid, currentFolder[tabId]);
         const email = (currentEmails[tabId] || []).find(e => e.uid == uid);
-        if (email) { email.isRead = !isRead; renderEmailList(tabId); selectEmail(tabId, uid); }
+        if (email) { email.isRead = !isRead; renderEmailList(tabId); selectEmail(tabId, uid); updateEmailBadge(tabId); }
       } catch (e) { alert('Error: ' + e.message); }
     }
 
@@ -2863,6 +2881,7 @@
         await electronAPI.archiveEmail(tabId, uid, currentFolder[tabId]);
         currentEmails[tabId] = (currentEmails[tabId] || []).filter(e => e.uid != uid);
         renderEmailList(tabId);
+        updateEmailBadge(tabId);
         document.getElementById(`email-viewer-${tabId}`).innerHTML = '<div class="email-placeholder">Email archived</div>';
       } catch (e) { alert('Archive failed: ' + e.message); }
     }
@@ -2872,6 +2891,7 @@
         await electronAPI.trashEmail(tabId, uid, currentFolder[tabId]);
         currentEmails[tabId] = (currentEmails[tabId] || []).filter(e => e.uid != uid);
         renderEmailList(tabId);
+        updateEmailBadge(tabId);
         document.getElementById(`email-viewer-${tabId}`).innerHTML = '<div class="email-placeholder">Email deleted</div>';
       } catch (e) { alert('Delete failed: ' + e.message); }
     }
@@ -2881,6 +2901,7 @@
         await electronAPI.spamEmail(tabId, uid, currentFolder[tabId]);
         currentEmails[tabId] = (currentEmails[tabId] || []).filter(e => e.uid != uid);
         renderEmailList(tabId);
+        updateEmailBadge(tabId);
         document.getElementById(`email-viewer-${tabId}`).innerHTML = '<div class="email-placeholder">Marked as spam</div>';
       } catch (e) { alert('Failed: ' + e.message); }
     }
